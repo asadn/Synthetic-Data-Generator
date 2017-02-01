@@ -69,8 +69,8 @@ class TestModels:
                                 children=["UserName"],
                                 wday_probs={"asad":{1:0.9, 2:0.9, 3:0.9, 4:0.9, 5:0.8},
                                             "hari":{1:0.9, 2:0.9, 3:0.9, 4:0.9, 5:0.9}},
-                                hour_probs={"asad":{8:0.2, 9:0.2, 10:0.2, 11:0.2, 12:0.2},
-                                            "hari":{1:0.2, 2:0.2, 3:0.2, 4:0.2, 5:0.2}},
+                                hour_probs={"asad":{8:0.9, 9:0.9, 10:0.9, 11:0.9, 12:0.9},
+                                            "hari":{1:0.9, 2:0.9, 3:0.9, 4:0.9, 5:0.9}},
                                 number_eventsPH={"asad":{8:10, 9:10, 10:10, 11:50, 12:50},
                                                  "hari":{1:10, 2:10, 3:10, 4:50, 5:50}},
                                 name="EventTime",
@@ -84,7 +84,7 @@ class TestModels:
                               position=1,
                               level=1,
                               is_root="No",
-                              parents=None,
+                              parents=["EventTime"],
                               parentscount=None)]
         cols[2] = [VarcharCol(c_p_t={"asad":{"Dest1":0.2, "Dest2":0.3, "Dest3":0.5},
                                      "hari":{"Dest2":0.2, "Dest3":0.3, "Dest4":0.5}},
@@ -92,12 +92,13 @@ class TestModels:
                               position=2,
                               level=2,
                               is_root="No",
-                              parents=None,
+                              parents=["UserName"],
                               parentscount=None)]
-        tree_data = Tree(cols)
-        records = tree_data.generate_data(_start=datetime.strptime("21/11/06 00:00", "%d/%m/%y %H:%M"),
-                                _end=datetime.strptime("21/12/06 00:00", "%d/%m/%y %H:%M"))
-        assert_equal(len(records) > 0, True)
+        header = ["EventTime","UserName","Destination"]
+        tree_data = Tree(cols, header)
+        records = tree_data.generate_data(_start=datetime.strptime("21/11/06 08:00", "%d/%m/%y %H:%M"),
+                                _end=datetime.strptime("21/12/06 00:00", "%d/%m/%y %H:%M"),filename="data.csv")
+        assert_equal(len(records)>1, True)
 
 
     def test_general_funcs(self):

@@ -1,10 +1,12 @@
 """ This module redifine certain datatypes to be used  for data generation"""
 import sys
+import numpy
 from numpy import random
 from datetime import datetime
 from datetime import timedelta
 from datagenerator.pyfiles.randomGen import data_genNorm
 from datagenerator.pyfiles.general import generate_dates
+from datagenerator.pyfiles.general import generate_hash_string
 
 
 class Column(object):
@@ -34,6 +36,14 @@ class VarcharCol(Column):
                 is_root, parents, parentscount)
         self.c_p_t = c_p_t
 
+    def generate_value(self,rec):
+        """ Gets value from CPT for given parents """
+        hash_string = generate_hash_string(rec,self.parents)
+        col_value = data_genNorm(self.c_p_t[hash_string].keys(),
+                                 numpy.array(self.c_p_t[hash_string].values()),1)
+        return str(col_value)
+
+
 class FloatCol(Column):
     """ Used to store float data type information """
     col_type = "float"
@@ -51,6 +61,14 @@ class FloatCol(Column):
         #value = 4.5
         return float(value)
 
+    def generate_value(self,rec):
+        """ Gets value from CPT for given parents """
+        hash_string = generate_hash_string(rec,self.parents)
+        tmp_col_value = data_genNorm(self.c_p_t[hash_string].keys(),
+                                 numpy.array(self.c_p_t[hash_string].values()),1)
+        col_value = self.get_value(float(tmp_col_value))
+        return str(col_value)
+
 class IntCol(Column):
     """ Used to store int data type information """
     col_type = "float"
@@ -66,6 +84,14 @@ class IntCol(Column):
         """ Returns a random value generated using the bin and bandwidth"""
         value = random.uniform(bin_val, bin_val+self.bandwidth, 1)
         return int(value)
+
+    def generate_value(self,rec):
+        """ Gets value from CPT for given parents """
+        hash_string = generate_hash_string(rec,self.parents)
+        tmp_col_value = data_genNorm(self.c_p_t[hash_string].keys(),
+                                 numpy.array(self.c_p_t[hash_string].values()),1)
+        col_value = self.get_value(int(tmp_col_value))
+        return str(col_value)
 
 class TimestampCol(Column):
     """ Modified version of timestamp type """
@@ -112,8 +138,17 @@ class Tree(object):
     """ Manages an entire tree (collection of columns); Contains methods
     for printing data using tree"""
 
-    def __init__(self, columns):
+    def __init__(self, columns, header):
         self.columns = columns
+        self.header = header
+
+    def generate_csv(self,record,filename):
+        out_file = open("tests/out_data/"+filename,"a")
+        record_value = record[self.header[0]]
+        for col_name in self.header[1:]:
+            record_value += "," + record[col_name]
+        out_file.write(record_value+"\n")
+        out_file.close()
 
     def generate_ts_records(self, root, _date, _hour):
         """ Generate records with children for a given date and hour """
@@ -138,15 +173,15 @@ class Tree(object):
             for child in root.children:
                 new_record[child] = r_val[_iter]
                 _iter += 1
-                new_record[root.name] = datetime_val
+                new_record[root.name] = root.print_date(datetime_val)
             records.append(new_record)
         return records
 
-
-
-    def generate_data(self, counts=None, _start=None, _end=None):
+    def generate_data(self, filename, counts=None, _start=None, _end=None):
         """ Generate data for given tree """
 
+        out_file = open("tests/out_data/"+filename,"w")
+        out_file.close()
         records = []
         root = self.columns[0][0]
         if root.col_type == "timestamp":
@@ -157,5 +192,20 @@ class Tree(object):
             dates = generate_dates(_start, _end)
             for _date in dates:
                 for _hour in range(0, 24):
-                    records.extend(self.generate_ts_records(root, _date, _hour))
+                    if ((_date + timedelta(hours = _hour) >= _start) and
+                        (_date + timedelta(hours = _hour) <= _end)):
+                        records.extend(self.generate_ts_records(root, _date, _hour))
+        else:
+            print "Non timestamp root"
+            # TODO: Include the logic for non timestamp roots
+            # records = contain values of roots
+
+        col_keys = (self.columns).keys()
+        col_keys.sort()
+        for rec in records:
+            for level in col_keys:
+                if level > 1:
+                    for col in self.columns[level]:
+                        rec[col.name] = col.generate_value(rec)
+            self.generate_csv(rec,filename)
         return records

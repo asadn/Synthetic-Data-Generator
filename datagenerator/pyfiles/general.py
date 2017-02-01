@@ -10,3 +10,9 @@ def generate_dates(_start, _end):
     for d in range(delta.days + 1):
         dates.append(new_start + timedelta(days=d))
     return dates
+
+def generate_hash_string(cols, parents_list):
+    hash_string = cols[parents_list[0]]
+    for parent in parents_list[1:]:
+        hash_string += ";" + str(cols[parent])
+    return hash_string
