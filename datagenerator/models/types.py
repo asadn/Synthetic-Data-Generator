@@ -71,7 +71,7 @@ class FloatCol(Column):
 
 class IntCol(Column):
     """ Used to store int data type information """
-    col_type = "float"
+    col_type = "int"
 
     def __init__(self, bandwidth, c_p_t, name, position, level, is_root, parents,
                  parentscount):
