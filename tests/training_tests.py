@@ -8,8 +8,9 @@ from datetime import datetime
 """ Test Training """
 
 class TestTraining(object):
-    def __init__(self):
-        filename = "tests/in_data/webdata.csv"
+    @classmethod
+    def setupClass(self):
+        filename = "tests/in_data/sub_webdata.csv"
         overrides = {"port":"varchar", "httpcode":"varchar"}
         dependencies = {"username":["timestamp"],
                         "timestamp":[],
@@ -24,12 +25,13 @@ class TestTraining(object):
                         "bytesout":["url1"],
                         "httpcode":["username","url1"],
                         "httpmethod":["username","url1"]}
-        self.training_data = ModelTrainer(file=filename,
+        self.training_data = ModelTrainer(filename=filename,
                                     header="True",
                                     dependencies=dependencies,
                                     timestamp_cols=['timestamp'],
                                     timestamp_format=['%y-%m-%d %h:%M:%s'],
                                     overrides = overrides)
+        self.training_data.print_time_taken()
 
     def test_get_header_dtypes(self):
         """ Test get_data() method """
@@ -48,6 +50,7 @@ class TestTraining(object):
                                            "httpmethod":"varchar"})
 
 
+
     def test_get_model(self):
         """ Test get_model function """
         assert_equal(True,False)
@@ -57,6 +60,14 @@ class TestTraining(object):
         returned_data = (self.training_data.get_varchar_cols())
         expected_data = ["username","agent","source","sourceip","url1","url2",
         "dest_ip","port","httpcode","httpmethod"]
+        returned_data.sort()
+        expected_data.sort()
+        assert_equal(returned_data,expected_data)
+
+    def test_get_numeric_cols(self):
+        """ Test get_numeric_cols function """
+        returned_data = (self.training_data.get_numeric_cols())
+        expected_data = ["bytesin","bytesout"]
         returned_data.sort()
         expected_data.sort()
         assert_equal(returned_data,expected_data)
