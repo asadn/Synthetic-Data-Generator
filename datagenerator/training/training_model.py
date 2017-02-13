@@ -4,6 +4,7 @@ import sys
 import time
 from datagenerator.models.types import *
 from datagenerator.pyfiles.general import generate_hash_string
+from datagenerator.pyfiles.general import kernel_density_estimate
 
 class ModelTrainer(object):
     """ encapsulates the data and methods required to extract pattern from data"""
@@ -199,7 +200,7 @@ class ModelTrainer(object):
         for col in numeric_cols:
             if self.header[col] == "int":
                 new_node = IntCol(bandwidth={},
-                                  c_p_t=[],
+                                  c_p_t={},
                                   name=col,
                                   position=(list(self.data.columns)).index(col),
                                   level=self.levels[col],
@@ -222,12 +223,26 @@ class ModelTrainer(object):
             for index, row in distinct_parents.iterrows():
                 row = pd.DataFrame([tuple(row.values)], columns=row.index)
                 sub_data = pd.merge(self.data[sub_cols], row, on=new_node.parents, how="inner")
-                #TODO: pass sub_data(col) to kde and get store the results
+                bandwidth, kde_vals = kernel_density_estimate(sub_data[col].tolist())
+
+                # Remove bins with 0 probability in kde_vals
+                for bin_val in kde_vals.keys():
+                    if kde_vals[bin_val] < (0.000000000001):
+                        del kde_vals[bin_val]
+
+
                 # as values for key hash(parents)
-
+                parents_hash = generate_hash_string(row,new_node.parents)
+                # print row
+                # print new_node.parents
+                # print parents_hash
+                if len(kde_vals) == 0:
+                    print "Empty kde ",sub_data[col].tolist()
+                else:
+                    print kde_vals
+                new_node.c_p_t[parents_hash] = kde_vals
+                new_node.bandwidth[parents_hash] = bandwidth
             node_data[col] = new_node
-
-
         self.time_taken["get_numeric_nodes"] = (time.time() - START_TIME)
         return node_data
 
