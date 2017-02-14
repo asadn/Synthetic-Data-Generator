@@ -97,15 +97,15 @@ class TimestampCol(Column):
     """ Modified version of timestamp type """
     col_type = "timestamp"
 
-    def __init__(self, ts_format, children, wday_probs, hour_probs, number_eventsPH,
+    def __init__(self, ts_format, children, time_bucket, time_probs, number_eventsPH,
                  name, position, level, is_root, parents,
                  parentscount):
         super(TimestampCol, self).__init__(name, self.col_type, position,
                                            is_root, parents, parentscount)
         self.ts_format = ts_format
         self.children = children
-        self.wday_probs = wday_probs
-        self.hour_probs = hour_probs
+        self.time_bucket = time_bucket
+        self.time_probs = time_probs
         self.number_eventsPH = number_eventsPH
 
     def print_date(self, _timestamp):
@@ -150,22 +150,20 @@ class Tree(object):
         out_file.write(record_value+"\n")
         out_file.close()
 
-    def generate_ts_records(self, root, _date, _hour):
+    def generate_ts_records(self, root, datetime_val, time_val):
         """ Generate records with children for a given date and hour """
-        wday = _date.weekday()
         tmp_records = []
         records = []
-        for childhash in root.wday_probs.keys():
-            w_prob = root.wday_probs[childhash].get(wday, 0)
-            if (data_genNorm(["active", "inactive"],
-                [w_prob, 1-w_prob], 1) == "active"):
-                h_prob = root.hour_probs[childhash].get(_hour, 0)
+        for child in root.time_probs.keys():
+            for childhash in root.time_probs[child].keys():
+                t_prob = root.time_probs[child][childhash].get(time_val, 0)
+                # if t_prob > 0:
+                #     print time_val
                 if (data_genNorm(["active", "inactive"],
-                    [h_prob, 1-h_prob], 1) == "active"):
+                    [t_prob, 1-t_prob], 1) == "active"):
                     no_of_events = random.poisson(
-                            root.number_eventsPH[childhash].get(_hour, 0))
+                            root.number_eventsPH[childhash].get(time_val, 0))
                     tmp_records.extend([childhash]*no_of_events)
-        datetime_val = _date + timedelta(hours=_hour)
         for rec in tmp_records:
             r_val = rec.split(";")
             _iter = 0
@@ -192,9 +190,14 @@ class Tree(object):
             dates = generate_dates(_start, _end)
             for _date in dates:
                 for _hour in range(0, 24):
-                    if ((_date + timedelta(hours = _hour) >= _start) and
-                        (_date + timedelta(hours = _hour) <= _end)):
-                        records.extend(self.generate_ts_records(root, _date, _hour))
+                    if root.time_bucket == "weekhour":
+                        wday = _date.weekday()
+                        time_val = 24*wday + _hour
+                        datetime_val = _date + timedelta(hours=_hour)
+                        if ((_date + timedelta(hours = _hour) >= _start) and
+                            (_date + timedelta(hours = _hour) <= _end)):
+                            records.extend(self.generate_ts_records(root, datetime_val, time_val))
+                    # In case of week minute add an else condition here
         else:
             print "Non timestamp root"
             # TODO: Include the logic for non timestamp roots

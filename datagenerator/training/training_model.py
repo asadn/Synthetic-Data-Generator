@@ -2,6 +2,7 @@
 import pandas as pd
 import sys
 import time
+import numpy as np
 from datagenerator.models.types import *
 from datagenerator.pyfiles.general import generate_hash_string
 from datagenerator.pyfiles.general import kernel_density_estimate
@@ -143,6 +144,21 @@ class ModelTrainer(object):
         self.time_taken["get_numeric_cols"] = (time.time() - START_TIME)
         return numeric_cols
 
+    def get_timestamp_cols(self):
+        """ Get numeric columns from the data """
+        START_TIME = time.time()
+        timestamp_cols = []
+        for h_col in self.header.keys():
+            if self.header[h_col] in ['timestamp']:
+                if h_col not in timestamp_cols:
+                    timestamp_cols.append(h_col)
+            for parent in self.dependencies[h_col]:
+                if self.header[parent] in ["timestamp"]:
+                    if h_col not in timestamp_cols:
+                        timestamp_cols.append(h_col)
+        self.time_taken["get_timestamp_cols"] = (time.time() - START_TIME)
+        return timestamp_cols
+
     def get_varchar_nodes(self, varchar_cols):
         """ Extract pattern and store it in objects of type VarcharCol """
         START_TIME = time.time()
@@ -223,6 +239,7 @@ class ModelTrainer(object):
             for index, row in distinct_parents.iterrows():
                 row = pd.DataFrame([tuple(row.values)], columns=row.index)
                 sub_data = pd.merge(self.data[sub_cols], row, on=new_node.parents, how="inner")
+                # Get Kernel density estimates for given data
                 bandwidth, kde_vals = kernel_density_estimate(sub_data[col].tolist())
 
                 # Remove bins with 0 probability in kde_vals
@@ -236,15 +253,90 @@ class ModelTrainer(object):
                 # print row
                 # print new_node.parents
                 # print parents_hash
-                if len(kde_vals) == 0:
-                    print "Empty kde ",sub_data[col].tolist()
-                else:
-                    print kde_vals
+                # if len(kde_vals) == 0:
+                #     print "Empty kde ",sub_data[col].tolist()
+                # else:
+                #     print kde_vals
                 new_node.c_p_t[parents_hash] = kde_vals
                 new_node.bandwidth[parents_hash] = bandwidth
             node_data[col] = new_node
         self.time_taken["get_numeric_nodes"] = (time.time() - START_TIME)
         return node_data
+
+
+    def get_timestamp_nodes(self,timestamp_cols):
+        """ Extract patterns and store it in type IntCol/ FloatCol """
+        START_TIME = time.time()
+        node_data = {}
+        return_data = []
+        # Define columns of type IntCol/ FloatCol
+        for col in timestamp_cols:
+            if self.header[col] == "timestamp":
+                new_node = TimestampCol(ts_format="%d/%m/%y %H:%M:%S",
+                                  children=[],
+                                  time_bucket="weekhour", # TODO:need to parameterize it
+                                  time_probs={},
+                                  number_eventsPH={},
+                                  name=col,
+                                  position=(list(self.data.columns)).index(col),
+                                  level=self.levels[col],
+                                  is_root=("Yes" if (self.levels[col] == 0) else "No"),
+                                  parents=None,
+                                  parentscount=None)
+                root_node = col
+            elif self.header[col] == "varchar":
+                new_node = VarcharCol(c_p_t={},
+                                      name=col,
+                                      position=(list(self.data.columns)).index(col),
+                                      level=self.levels[col],
+                                      is_root=("Yes" if (self.levels[col] == 0) else "No"),
+                                      parents=self.dependencies[col],
+                                      parentscount={})
+            node_data[col] = new_node
+        # Update the children
+
+        for col in timestamp_cols:
+            if col != root_node:
+                return_data = [node_data.keys(),col,self.dependencies[col],root_node]
+                return_data = [self.dependencies[col],root_node]
+                return_data = [col]
+                (node_data[root_node].children).append(col)
+
+        # return_data = node_data[root_node].children
+
+        for child in node_data[root_node].children:
+            sub_cols = [root_node,child]
+            child_vals = self.data[child].unique()
+            for child_value in child_vals:
+                sub_data = (self.data[sub_cols])
+                sub_data = sub_data[sub_data[child] == child_value]
+                sub_data[root_node] = pd.to_datetime(sub_data[root_node])
+                sub_data["weekMinute"] = sub_data[root_node].apply(lambda ts: ts.weekday()*24*60 +
+                ts.hour*60 + ts.minute)
+                bandwidth, kde_time = kernel_density_estimate(sub_data["weekMinute"].tolist(),list(np.arange(0,10040)))
+                for bin_val in kde_time.keys():
+                    if kde_time[bin_val] < (0.000000000001):
+                        del kde_time[bin_val]
+
+                if node_data[root_node].time_bucket == "weekhour":
+                    kde_hour = {}
+                    for kde_key in kde_time.keys():
+                        new_bin = int(kde_key/60)*60 # Create hour buckets
+                        if kde_hour.has_key(kde_key):
+                            kde_hour[new_bin] += kde_time[kde_key]
+                        else:
+                            kde_hour[new_bin] = kde_time[kde_key]
+
+                if node_data[root_node].time_probs.has_key(child):
+                    node_data[root_node].time_probs[child][child_value] = kde_hour
+                else:
+                    node_data[root_node].time_probs[child] = {}
+                    node_data[root_node].time_probs[child][child_value] = kde_hour
+
+
+        return_data = node_data[root_node].time_probs
+        self.time_taken["get_numeric_nodes"] = (time.time() - START_TIME)
+        return return_data
 
 
     def get_model(self):
@@ -270,5 +362,7 @@ class ModelTrainer(object):
                                         self.time_taken["get_varchar_nodes"] -
                                         self.time_taken["get_numeric_cols"] -
                                         self.time_taken["get_numeric_nodes"])
-        return varchar_nodes
         # timestamp columns and columns whose parent is timestamp
+        timestamp_cols = self.get_timestamp_cols()
+        timestamp_nodes = self.get_timestamp_nodes(timestamp_cols)
+        return timestamp_nodes

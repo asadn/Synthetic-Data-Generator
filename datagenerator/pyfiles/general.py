@@ -14,6 +14,8 @@ def kernel_density_estimate(value_list,points=None):
     iqr = get_quartile_range(value_list) # Interquartile range
     min_iqr_sd = min(std_dev,iqr)
     bandwidth = min_iqr_sd*((float(4)/(3*no_of_values))**(1.0/5))
+    if bandwidth == 0:
+        return 0,{sum(value_list)/no_of_values: 1}
     # Generate bins
     if points is None:
         bin_values = [int(v/bandwidth)*int(bandwidth)for v in value_list]
@@ -36,14 +38,9 @@ def get_density(value_list, stdev, x_val):
 
 def get_quartile_range(value_list):
     """ returns Interquartile Range (Q3 - Q1) of a given set of data points """
-    value_list = sorted(value_list)
-    # Total number of points in dataset
-    num_points = len(value_list)
-    # Get medians of Q3 and Q1
-    median_q1 = value_list[int(num_points/4)]
-    median_q3 = value_list[int(3*num_points/4)]
+    #value_list = sorted(value_list)
     # Return the difference of Q3 and Q1 as IQR
-    return median_q3 - median_q1
+    return np.subtract(*np.percentile(value_list, [75,25]))
 
 def generate_dates(_start, _end):
     """Generates dates between given start and end """

@@ -32,6 +32,7 @@ class TestTraining(object):
                                     timestamp_format=['%y-%m-%d %h:%M:%s'],
                                     overrides = overrides)
         self.training_data.print_time_taken()
+        print self.training_data.model
 
     def test_get_header_dtypes(self):
         """ Test get_data() method """
@@ -68,6 +69,14 @@ class TestTraining(object):
         """ Test get_numeric_cols function """
         returned_data = (self.training_data.get_numeric_cols())
         expected_data = ["bytesin","bytesout"]
+        returned_data.sort()
+        expected_data.sort()
+        assert_equal(returned_data,expected_data)
+
+    def test_get_timestamp_cols(self):
+        """ Test get_timestamp_cols function """
+        returned_data = (self.training_data.get_timestamp_cols())
+        expected_data = ["timestamp","username"]
         returned_data.sort()
         expected_data.sort()
         assert_equal(returned_data,expected_data)
