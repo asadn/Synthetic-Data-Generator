@@ -4,6 +4,8 @@ from nose.tools import assert_equal
 from nose.tools import assert_raises
 from datagenerator.training.training_model import *
 from datetime import datetime
+import datetime
+from datagenerator.models.types import *
 
 """ Test Training """
 
@@ -32,7 +34,7 @@ class TestTraining(object):
                                     timestamp_format=['%y-%m-%d %h:%M:%s'],
                                     overrides = overrides)
         self.training_data.print_time_taken()
-        print self.training_data.model
+        print type(self.training_data.model[0])
 
     def test_get_header_dtypes(self):
         """ Test get_data() method """
@@ -54,6 +56,10 @@ class TestTraining(object):
 
     def test_get_model(self):
         """ Test get_model function """
+        tree_data = Tree(self.training_data.model, self.training_data.header.keys())
+        records = tree_data.generate_data(_start=datetime.datetime.strptime("21/11/06 08:00", "%d/%m/%y %H:%M"),
+                                _end=datetime.datetime.strptime("21/12/06 00:00", "%d/%m/%y %H:%M"),filename="data.csv")
+        assert_equal(len(records)>1, True)
         assert_equal(True,False)
 
     def test_get_varchar_cols(self):

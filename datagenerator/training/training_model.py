@@ -6,11 +6,12 @@ import numpy as np
 from datagenerator.models.types import *
 from datagenerator.pyfiles.general import generate_hash_string
 from datagenerator.pyfiles.general import kernel_density_estimate
+from datagenerator.pyfiles.general import extract_weekminute_probs
 
 class ModelTrainer(object):
     """ encapsulates the data and methods required to extract pattern from data"""
 
-    def __init__(self, filename, header, dependencies, timestamp_cols = None,
+    def __init__(self, filename, header, dependencies, timestamp_cols=None,
                  timestamp_format=None, overrides=None):
         self.time_taken = {}
         if header == "True":
@@ -21,13 +22,13 @@ class ModelTrainer(object):
         self.timestamp_cols = []
         try:
             for col in timestamp_cols:
-                if col not in map(str,tuple(self.data.columns)):
+                if col not in map(str, tuple(self.data.columns)):
                     raise ValueError
                 else:
                     self.timestamp_cols.append(col)
         except ValueError:
-                print "Timestamp column doesn't match columns in data header"
-                sys.exit(0)
+            print "Timestamp column doesn't match columns in data header"
+            sys.exit(0)
 
         self.timestamp_format = timestamp_format
         self.get_header_dtypes(overrides)
@@ -37,19 +38,19 @@ class ModelTrainer(object):
 
     def print_time_taken(self):
         for time_key in self.time_taken.keys():
-            print time_key,":",self.time_taken[time_key]
-        print "Total time :",sum(self.time_taken.values())
+            print time_key, ":", self.time_taken[time_key]
+        print "Total time :", sum(self.time_taken.values())
 
-    def get_header_dtypes(self,overrides):
+    def get_header_dtypes(self, overrides):
         """ Extracts datatypes of each column from the data """
         START_TIME = time.time()
         header_list = map(str, tuple(self.data.columns))
         self.header = {}
         for col in header_list:
             if (col not in self.timestamp_cols) and (col not in overrides.keys()):
-                if isinstance((self.data[[col]].iloc[1])[0],int):
+                if isinstance((self.data[[col]].iloc[1])[0], int):
                     self.header[col] = "int"
-                elif isinstance((self.data[[col]].iloc[1])[0],float):
+                elif isinstance((self.data[[col]].iloc[1])[0], float):
                     self.header[col] = "float"
                 else:
                     self.header[col] = "varchar"
@@ -72,7 +73,7 @@ class ModelTrainer(object):
         nodes = self.dependencies.keys()
         max_iter = len(nodes)*(len(nodes) + 1)/2
         while len(nodes) > 0:
-            if i>=0:
+            if i >= 0:
                 i = i % len(nodes)
             node = nodes[i]
             parents = self.dependencies[node]
@@ -116,9 +117,9 @@ class ModelTrainer(object):
                             else:
                                 raise ValueError
                         except ValueError:
-                                print h_col + " has a numeric parent!!"
-                                self.time_taken["get_varchar_cols"] = (time.time() - START_TIME)
-                                sys.exit(0)
+                            print h_col + " has a numeric parent!!"
+                            self.time_taken["get_varchar_cols"] = (time.time() - START_TIME)
+                            sys.exit(0)
         self.time_taken["get_varchar_cols"] = (time.time() - START_TIME)
         return varchar_cols
 
@@ -138,9 +139,9 @@ class ModelTrainer(object):
                             else:
                                 raise ValueError
                         except ValueError:
-                                print h_col + " has a numeric parent!!"
-                                self.time_taken["get_numeric_cols"] = (time.time() - START_TIME)
-                                sys.exit(0)
+                            print h_col + " has a numeric parent!!"
+                            self.time_taken["get_numeric_cols"] = (time.time() - START_TIME)
+                            sys.exit(0)
         self.time_taken["get_numeric_cols"] = (time.time() - START_TIME)
         return numeric_cols
 
@@ -225,18 +226,20 @@ class ModelTrainer(object):
                                   parentscount={})
             elif self.header[col] == "float":
                 new_node = FloatCol(bandwidth={},
-                                  c_p_t={},
-                                  name=col,
-                                  position=(list(self.data.columns)).index(col),
-                                  level=self.levels[col],
-                                  is_root="No",
-                                  parents=self.dependencies[col],
-                                  parentscount={})
+                                    c_p_t={},
+                                    name=col,
+                                    position=(list(self.data.columns)).index(col),
+                                    level=self.levels[col],
+                                    is_root="No",
+                                    parents=self.dependencies[col],
+                                    parentscount={})
 
             sub_cols = [col]
             sub_cols.extend(new_node.parents)
             distinct_parents = self.data[new_node.parents].drop_duplicates()
             for index, row in distinct_parents.iterrows():
+                # as values for key hash(parents)
+                parents_hash = generate_hash_string(row, new_node.parents)
                 row = pd.DataFrame([tuple(row.values)], columns=row.index)
                 sub_data = pd.merge(self.data[sub_cols], row, on=new_node.parents, how="inner")
                 # Get Kernel density estimates for given data
@@ -248,8 +251,7 @@ class ModelTrainer(object):
                         del kde_vals[bin_val]
 
 
-                # as values for key hash(parents)
-                parents_hash = generate_hash_string(row,new_node.parents)
+
                 # print row
                 # print new_node.parents
                 # print parents_hash
@@ -264,7 +266,7 @@ class ModelTrainer(object):
         return node_data
 
 
-    def get_timestamp_nodes(self,timestamp_cols):
+    def get_timestamp_nodes(self, timestamp_cols):
         """ Extract patterns and store it in type IntCol/ FloatCol """
         START_TIME = time.time()
         node_data = {}
@@ -273,16 +275,16 @@ class ModelTrainer(object):
         for col in timestamp_cols:
             if self.header[col] == "timestamp":
                 new_node = TimestampCol(ts_format="%d/%m/%y %H:%M:%S",
-                                  children=[],
-                                  time_bucket="weekhour", # TODO:need to parameterize it
-                                  time_probs={},
-                                  number_eventsPH={},
-                                  name=col,
-                                  position=(list(self.data.columns)).index(col),
-                                  level=self.levels[col],
-                                  is_root=("Yes" if (self.levels[col] == 0) else "No"),
-                                  parents=None,
-                                  parentscount=None)
+                                        children=[],
+                                        time_bucket="weekhour", # TODO:need to parameterize it
+                                        time_probs={},
+                                        number_eventsPH={},
+                                        name=col,
+                                        position=(list(self.data.columns)).index(col),
+                                        level=self.levels[col],
+                                        is_root=("Yes" if (self.levels[col] == 0) else "No"),
+                                        parents=None,
+                                        parentscount=None)
                 root_node = col
             elif self.header[col] == "varchar":
                 new_node = VarcharCol(c_p_t={},
@@ -297,9 +299,6 @@ class ModelTrainer(object):
 
         for col in timestamp_cols:
             if col != root_node:
-                return_data = [node_data.keys(),col,self.dependencies[col],root_node]
-                return_data = [self.dependencies[col],root_node]
-                return_data = [col]
                 (node_data[root_node].children).append(col)
 
         # return_data = node_data[root_node].children
@@ -311,21 +310,43 @@ class ModelTrainer(object):
                 sub_data = (self.data[sub_cols])
                 sub_data = sub_data[sub_data[child] == child_value]
                 sub_data[root_node] = pd.to_datetime(sub_data[root_node])
+
+                #Extrach Week minute
                 sub_data["weekMinute"] = sub_data[root_node].apply(lambda ts: ts.weekday()*24*60 +
                 ts.hour*60 + ts.minute)
-                bandwidth, kde_time = kernel_density_estimate(sub_data["weekMinute"].tolist(),list(np.arange(0,10040)))
-                for bin_val in kde_time.keys():
-                    if kde_time[bin_val] < (0.000000000001):
-                        del kde_time[bin_val]
+
+                ## Extract Minute probabilities using KDE
+                # bandwidth, kde_time = kernel_density_estimate(sub_data["weekMinute"].tolist(),list(np.arange(0,10040)))
+                # for bin_val in kde_time.keys():
+                #     if kde_time[bin_val] < (0.000000000001):
+                #         del kde_time[bin_val]
+
+                ## Extracting probabilities using Frequencies
+                # Extract Weekday counts
+                sub_data_dates = sub_data[root_node].apply(lambda dt: datetime.datetime(dt.year,dt.month,dt.day,0,0))
+                sub_data_dates = pd.DataFrame(sub_data_dates.unique())
+                sub_data_dates[0] = pd.to_datetime(sub_data_dates[0])
+                sub_data_weekday = sub_data_dates[0].apply(lambda ts: ts.weekday())
+                weekday_counts = sub_data_weekday.value_counts().to_dict()
 
                 if node_data[root_node].time_bucket == "weekhour":
-                    kde_hour = {}
-                    for kde_key in kde_time.keys():
-                        new_bin = int(kde_key/60)*60 # Create hour buckets
-                        if kde_hour.has_key(kde_key):
-                            kde_hour[new_bin] += kde_time[kde_key]
-                        else:
-                            kde_hour[new_bin] = kde_time[kde_key]
+                    # Week hour counts
+                    sub_data_hour = sub_data[root_node].apply(lambda dt: datetime.datetime(dt.year,dt.month,dt.day,dt.hour))
+                    sub_data_hour = pd.DataFrame(sub_data_hour.unique())
+                    sub_data_hour[0] = pd.to_datetime(sub_data_hour[0])
+                    sub_data_weekhour = sub_data_hour[0].apply(lambda ts: ts.weekday()*24*60 + ts.hour*60)
+                    weekhour_counts = sub_data_weekhour.value_counts().to_dict()
+                    print weekhour_counts, weekday_counts
+                    weekday_counts = {0:10,1:10,2:10,3:10,4:10,5:10,6:10}
+                    kde_hour = extract_weekminute_probs(weekhour_counts, weekday_counts)
+
+                    #Extract events per time bucket
+                    sub_data["DateHour"] = sub_data[root_node].apply(lambda dt: datetime.datetime(dt.year,dt.month,dt.day,dt.hour,0))
+                    sub_data["WeekHour"] = sub_data[root_node].apply(lambda ts: ts.weekday()*24*60 +
+                                                                                ts.hour*60)
+                    grouped = sub_data.groupby(['DateHour','WeekHour'],as_index=False)
+                    eventsPH = (((grouped.size().to_frame()).groupby(level=1)).mean())[0].to_dict()
+
 
                 if node_data[root_node].time_probs.has_key(child):
                     node_data[root_node].time_probs[child][child_value] = kde_hour
@@ -333,10 +354,15 @@ class ModelTrainer(object):
                     node_data[root_node].time_probs[child] = {}
                     node_data[root_node].time_probs[child][child_value] = kde_hour
 
+                if node_data[root_node].number_eventsPH.has_key(child):
+                    node_data[root_node].number_eventsPH[child][child_value] = eventsPH
+                else:
+                    node_data[root_node].number_eventsPH[child] = {}
+                    node_data[root_node].number_eventsPH[child][child_value] = eventsPH
 
-        return_data = node_data[root_node].time_probs
-        self.time_taken["get_numeric_nodes"] = (time.time() - START_TIME)
-        return return_data
+
+        self.time_taken["get_timestamp_nodes"] = (time.time() - START_TIME)
+        return node_data
 
 
     def get_model(self):
@@ -344,7 +370,7 @@ class ModelTrainer(object):
         START_TIME = time.time()
         # varchar columns whose parent is not timestamp
         varchar_cols = self.get_varchar_cols()
-
+        tree_nodes = []
         # remove varchar columns that has timestamp as parents
         for v_col in varchar_cols:
             for parent in self.dependencies[v_col]:
@@ -353,10 +379,11 @@ class ModelTrainer(object):
                     break
 
         varchar_nodes = self.get_varchar_nodes(varchar_cols)
-
+        tree_nodes.extend(varchar_nodes.values())
         # int/float columns
         numeric_cols = self.get_numeric_cols()
         numeric_nodes = self.get_numeric_nodes(numeric_cols)
+        tree_nodes.extend(numeric_nodes.values())
         self.time_taken["get_model"] = (time.time() - START_TIME -
                                         self.time_taken["get_varchar_cols"] -
                                         self.time_taken["get_varchar_nodes"] -
@@ -365,4 +392,5 @@ class ModelTrainer(object):
         # timestamp columns and columns whose parent is timestamp
         timestamp_cols = self.get_timestamp_cols()
         timestamp_nodes = self.get_timestamp_nodes(timestamp_cols)
-        return timestamp_nodes
+        tree_nodes.extend(timestamp_nodes.values())
+        return tree_nodes

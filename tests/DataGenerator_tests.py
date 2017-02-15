@@ -19,7 +19,7 @@ class TestModels:
                        is_root="No",
                        parents=None,
                        parentscount=None)
-        random_val = val.get_value(0)
+        random_val = val.get_value(0,100)
         assert_equal((random_val < 100) and (random_val > 0), True)      # The value should be within range
         assert_equal(isinstance(random_val, float), True)     # The value should be of type float
 
@@ -33,7 +33,7 @@ class TestModels:
                      is_root="No",
                      parents=None,
                      parentscount=None)
-        random_val = val.get_value(0)
+        random_val = val.get_value(0,100)
         assert_equal((random_val < 100) and (random_val > 0), True)      # The value should be within range
         assert_equal(isinstance(random_val, int), True)                     # The value should be of type int
 
@@ -62,42 +62,42 @@ class TestModels:
         assert_raises(SystemExit, ProbabilityDist, 1)
         assert_raises(SystemExit, ProbabilityDist, {"a":0.5, "b":0.6})
 
-    def test_trees(self):
-        """ Tests the tree types """
-        cols = {}
-        cols[0] = [TimestampCol(ts_format="%d/%m/%y %H:%M:%S",
-                                children=["UserName"],
-                                time_bucket="weekhour",
-                                time_probs={"UserName":{"asad":{32:0.9, 56:0.9, 80:0.9, 104:0.9, 128:0.9},
-                                            "hari":{35:0.9, 59:0.9, 83:0.9, 107:0.9, 131:0.9}}},
-                                number_eventsPH={"asad":{32:10, 56:10, 80:10, 104:50, 128:50},
-                                                 "hari":{35:10, 59:10, 83:10, 107:50, 131:50}},
-                                name="EventTime",
-                                position=0,
-                                level=0,
-                                is_root="Yes",
-                                parents=None,
-                                parentscount=None)]
-        cols[1] = [VarcharCol(c_p_t={},
-                              name="UserName",
-                              position=1,
-                              level=1,
-                              is_root="No",
-                              parents=["EventTime"],
-                              parentscount=None)]
-        cols[2] = [VarcharCol(c_p_t={"asad":{"Dest1":0.2, "Dest2":0.3, "Dest3":0.5},
-                                     "hari":{"Dest2":0.2, "Dest3":0.3, "Dest4":0.5}},
-                              name="Destination",
-                              position=2,
-                              level=2,
-                              is_root="No",
-                              parents=["UserName"],
-                              parentscount=None)]
-        header = ["EventTime","UserName","Destination"]
-        tree_data = Tree(cols, header)
-        records = tree_data.generate_data(_start=datetime.strptime("21/11/06 08:00", "%d/%m/%y %H:%M"),
-                                _end=datetime.strptime("21/12/06 00:00", "%d/%m/%y %H:%M"),filename="data.csv")
-        assert_equal(len(records)>1, True)
+    # def test_trees(self):
+    #     """ Tests the tree types """
+    #     cols = {}
+    #     cols[0] = [TimestampCol(ts_format="%d/%m/%y %H:%M:%S",
+    #                             children=["UserName"],
+    #                             time_bucket="weekhour",
+    #                             time_probs={"UserName":{"asad":{32:0.9, 56:0.9, 80:0.9, 104:0.9, 128:0.9},
+    #                                         "hari":{35:0.9, 59:0.9, 83:0.9, 107:0.9, 131:0.9}}},
+    #                             number_eventsPH={"asad":{32:10, 56:10, 80:10, 104:50, 128:50},
+    #                                              "hari":{35:10, 59:10, 83:10, 107:50, 131:50}},
+    #                             name="EventTime",
+    #                             position=0,
+    #                             level=0,
+    #                             is_root="Yes",
+    #                             parents=None,
+    #                             parentscount=None)]
+    #     cols[1] = [VarcharCol(c_p_t={},
+    #                           name="UserName",
+    #                           position=1,
+    #                           level=1,
+    #                           is_root="No",
+    #                           parents=["EventTime"],
+    #                           parentscount=None)]
+    #     cols[2] = [VarcharCol(c_p_t={"asad":{"Dest1":0.2, "Dest2":0.3, "Dest3":0.5},
+    #                                  "hari":{"Dest2":0.2, "Dest3":0.3, "Dest4":0.5}},
+    #                           name="Destination",
+    #                           position=2,
+    #                           level=2,
+    #                           is_root="No",
+    #                           parents=["UserName"],
+    #                           parentscount=None)]
+    #     header = ["EventTime","UserName","Destination"]
+    #     tree_data = Tree(cols, header)
+    #     records = tree_data.generate_data(_start=datetime.strptime("21/11/06 08:00", "%d/%m/%y %H:%M"),
+    #                             _end=datetime.strptime("21/12/06 00:00", "%d/%m/%y %H:%M"),filename="data.csv")
+    #     assert_equal(len(records)>1, True)
 
 
     def test_general_funcs(self):

@@ -57,3 +57,9 @@ def generate_hash_string(cols, parents_list):
     for parent in parents_list[1:]:
         hash_string += ";" + str(cols[parent])
     return hash_string
+
+def extract_weekminute_probs(weektime_counts,weekday_counts):
+    weektime_probs = {}
+    for w_bucket in weektime_counts.keys():
+            weektime_probs[w_bucket] = float(weektime_counts[w_bucket])/weekday_counts[int(w_bucket/(24*60))]
+    return weektime_probs
