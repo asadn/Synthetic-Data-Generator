@@ -90,7 +90,6 @@ class IntCol(Column):
     def generate_value(self,rec):
         """ Gets value from CPT for given parents """
         hash_string = generate_hash_string(rec,self.parents)
-        print self.c_p_t
         tmp_col_value = data_genNorm(self.c_p_t[hash_string].keys(),
                                  numpy.array(self.c_p_t[hash_string].values()),1)
         col_value = self.get_value(int(tmp_col_value),self.bandwidth[hash_string])
@@ -182,6 +181,7 @@ class Tree(object):
         """ Generate data for given tree """
 
         out_file = open("tests/out_data/"+filename,"w")
+        out_file.write(",".join(self.header) + "\n")
         out_file.close()
         records = []
         #root = self.columns[0][0]
@@ -191,7 +191,6 @@ class Tree(object):
         for node in self.columns:
             col_dict[node.level].append(node)
 
-        print col_dict
         root = col_dict[0][0]
         if root == 'Null':
             print "Unable to retrieve root"
@@ -222,7 +221,6 @@ class Tree(object):
         for rec in records:
             for level in col_keys:
                 if level > 1:
-                    print level
                     for col in col_dict[level]:
                         rec[col.name] = col.generate_value(rec)
             self.generate_csv(rec,filename)

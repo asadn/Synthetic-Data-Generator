@@ -14,10 +14,12 @@ class ModelTrainer(object):
     def __init__(self, filename, header, dependencies, timestamp_cols=None,
                  timestamp_format=None, overrides=None):
         self.time_taken = {}
+        # TODO: handle columns with NaN
         if header == "True":
             self.data = pd.DataFrame(pd.read_csv(filename, header=0))
         else:
             self.data = pd.read_csv(filename, header=None)
+        self.data.fillna(0)
 
         self.timestamp_cols = []
         try:
@@ -212,7 +214,7 @@ class ModelTrainer(object):
         """ Extract patterns and store it in type IntCol/ FloatCol """
         START_TIME = time.time()
         node_data = {}
-
+        print numeric_cols
         # Define columns of type IntCol/ FloatCol
         for col in numeric_cols:
             if self.header[col] == "int":
@@ -274,7 +276,7 @@ class ModelTrainer(object):
         # Define columns of type IntCol/ FloatCol
         for col in timestamp_cols:
             if self.header[col] == "timestamp":
-                new_node = TimestampCol(ts_format="%d/%m/%y %H:%M:%S",
+                new_node = TimestampCol(ts_format=self.timestamp_format,
                                         children=[],
                                         time_bucket="weekhour", # TODO:need to parameterize it
                                         time_probs={},
@@ -336,7 +338,6 @@ class ModelTrainer(object):
                     sub_data_hour[0] = pd.to_datetime(sub_data_hour[0])
                     sub_data_weekhour = sub_data_hour[0].apply(lambda ts: ts.weekday()*24*60 + ts.hour*60)
                     weekhour_counts = sub_data_weekhour.value_counts().to_dict()
-                    print weekhour_counts, weekday_counts
                     weekday_counts = {0:10,1:10,2:10,3:10,4:10,5:10,6:10}
                     kde_hour = extract_weekminute_probs(weekhour_counts, weekday_counts)
 
@@ -382,7 +383,11 @@ class ModelTrainer(object):
         tree_nodes.extend(varchar_nodes.values())
         # int/float columns
         numeric_cols = self.get_numeric_cols()
-        numeric_nodes = self.get_numeric_nodes(numeric_cols)
+        if len(numeric_cols) > 0:
+            numeric_nodes = self.get_numeric_nodes(numeric_cols)
+        else:
+            numeric_nodes = {}
+            self.time_taken["get_numeric_nodes"] = 0
         tree_nodes.extend(numeric_nodes.values())
         self.time_taken["get_model"] = (time.time() - START_TIME -
                                         self.time_taken["get_varchar_cols"] -
@@ -391,6 +396,7 @@ class ModelTrainer(object):
                                         self.time_taken["get_numeric_nodes"])
         # timestamp columns and columns whose parent is timestamp
         timestamp_cols = self.get_timestamp_cols()
-        timestamp_nodes = self.get_timestamp_nodes(timestamp_cols)
+        if len(timestamp_cols) > 0:
+            timestamp_nodes = self.get_timestamp_nodes(timestamp_cols)
         tree_nodes.extend(timestamp_nodes.values())
         return tree_nodes
