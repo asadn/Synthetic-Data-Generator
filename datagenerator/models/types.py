@@ -9,13 +9,16 @@ from datagenerator.pyfiles.randomGen import data_genNorm
 from datagenerator.pyfiles.general import generate_dates
 from datagenerator.pyfiles.general import generate_hash_string
 from collections import defaultdict
+import logging
 
+logger = logging.getLogger(__name__)
 
 class Column(object):
     """ Parent class of all columns """
 
     def __init__(self, name, col_type, position, level, is_root="No",
-                 parents=None, parentscount=None):
+                 parents=None, parentscount=None, logger=None):
+        self.logger = logging.getLogger(__name__)
         self.name = name
         self.col_type = col_type
         self.is_root = is_root
@@ -27,6 +30,7 @@ class Column(object):
         else:
             self.parents = parents
             self.parentscount = parentscount
+
 
 class VarcharCol(Column):
     """ Used to store float data type information """
@@ -126,11 +130,11 @@ class ProbabilityDist(object):
             elif abs(sum(probability_dict.values()) - 1) > 0.00001:
                 raise ValueError
         except TypeError:
-            print "invalid type in ProbabilityDist"
+            logger.error("invalid type in ProbabilityDist")
             self.probability_dict = None
             sys.exit(0)
         except ValueError:
-            print "invalid value in ProbabilityDist"
+            logger.error("invalid value in ProbabilityDist")
             self.probability_dict = None
             sys.exit(0)
         else:
@@ -193,11 +197,11 @@ class Tree(object):
 
         root = col_dict[0][0]
         if root == 'Null':
-            print "Unable to retrieve root"
+            self.logger.error("Unable to retrieve root")
             sys.exit(0)
         if root.col_type == "timestamp":
             if (_start is None) or (_end is None):
-                print "Error: Please specify start and end dates"
+                self.logger.error("Please specify start and end dates")
                 sys.exit(0)
 
             dates = generate_dates(_start, _end)
@@ -212,7 +216,7 @@ class Tree(object):
                             records.extend(self.generate_ts_records(root, datetime_val, time_val))
                     # In case of week minute add an else condition here
         else:
-            print "Non timestamp root"
+            self.logger.error("Non timestamp root")
             # TODO: Include the logic for non timestamp roots
             # records = contain values of roots
 

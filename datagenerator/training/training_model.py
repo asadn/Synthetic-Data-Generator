@@ -7,12 +7,18 @@ from datagenerator.models.types import *
 from datagenerator.pyfiles.general import generate_hash_string
 from datagenerator.pyfiles.general import kernel_density_estimate
 from datagenerator.pyfiles.general import extract_weekminute_probs
+import logging
+
+# Set logging parameters
 
 class ModelTrainer(object):
     """ encapsulates the data and methods required to extract pattern from data"""
 
     def __init__(self, filename, header, dependencies, timestamp_cols=None,
-                 timestamp_format=None, overrides=None):
+                 timestamp_format=None, overrides=None, logger=None):
+        self.logger = logging.getLogger(__name__)
+        self.logger.debug("Model trainer")
+        self.logger.info("Extracting patterns from "+filename)
         self.time_taken = {}
         # TODO: handle columns with NaN
         if header == "True":
@@ -25,11 +31,12 @@ class ModelTrainer(object):
         try:
             for col in timestamp_cols:
                 if col not in map(str, tuple(self.data.columns)):
+                    self.logger.error(col + " is not present in header of given data")
                     raise ValueError
                 else:
                     self.timestamp_cols.append(col)
         except ValueError:
-            print "Timestamp column doesn't match columns in data header"
+            self.logger.error("Timestamp column doesn't match columns in data header")
             sys.exit(0)
 
         self.timestamp_format = timestamp_format
@@ -40,8 +47,8 @@ class ModelTrainer(object):
 
     def print_time_taken(self):
         for time_key in self.time_taken.keys():
-            print time_key, ":", self.time_taken[time_key]
-        print "Total time :", sum(self.time_taken.values())
+            self.logger.info(time_key + ":" + str(self.time_taken[time_key]))
+        self.logger.info("Total time :" + str(sum(self.time_taken.values())))
 
     def get_header_dtypes(self, overrides):
         """ Extracts datatypes of each column from the data """
@@ -61,9 +68,11 @@ class ModelTrainer(object):
             elif col in overrides.keys():
                 self.header[col] = overrides[col]
             else:
-                print "Unable to determine column type"
+                self.logger.info("Unable to determine column type")
                 self.time_taken["get_header_dtypes"] = (time.time() - START_TIME)
                 sys.exit(0)
+        self.logger.debug("Extracted types for columns : " +
+                          ' '.join('{}:{}'.format(key,val) for key,val in self.header.items()))
         self.time_taken["get_header_dtypes"] = (time.time() - START_TIME)
 
     def get_level(self):
@@ -97,9 +106,11 @@ class ModelTrainer(object):
             i += 1
             iter_no += 1
             if iter_no == max_iter:
-                print "Infinite loop in determining levels"
+                self.logger.info("Infinite loop in determining levels")
                 self.time_taken["get_level"] = (time.time() - START_TIME)
                 return {}
+        self.logger.debug("Extracted levels for columns : " +
+                          ' '.join('{}:{}'.format(key,val) for key,val in level.items()))
         self.time_taken["get_level"] = (time.time() - START_TIME)
         return level
 
@@ -119,7 +130,7 @@ class ModelTrainer(object):
                             else:
                                 raise ValueError
                         except ValueError:
-                            print h_col + " has a numeric parent!!"
+                            self.logger.error(h_col + " has a numeric parent!!")
                             self.time_taken["get_varchar_cols"] = (time.time() - START_TIME)
                             sys.exit(0)
         self.time_taken["get_varchar_cols"] = (time.time() - START_TIME)
@@ -141,7 +152,7 @@ class ModelTrainer(object):
                             else:
                                 raise ValueError
                         except ValueError:
-                            print h_col + " has a numeric parent!!"
+                            self.logger.info(h_col + " has a numeric parent!!")
                             self.time_taken["get_numeric_cols"] = (time.time() - START_TIME)
                             sys.exit(0)
         self.time_taken["get_numeric_cols"] = (time.time() - START_TIME)
@@ -162,7 +173,7 @@ class ModelTrainer(object):
         self.time_taken["get_timestamp_cols"] = (time.time() - START_TIME)
         return timestamp_cols
 
-    def get_varchar_nodes(self, varchar_cols):
+    def get_varchar_node(self, varchar_cols):
         """ Extract pattern and store it in objects of type VarcharCol """
         START_TIME = time.time()
         node_data = {}
@@ -379,11 +390,13 @@ class ModelTrainer(object):
                     varchar_cols.remove(v_col)
                     break
 
-        varchar_nodes = self.get_varchar_nodes(varchar_cols)
-        tree_nodes.extend(varchar_nodes.values())
+        self.logger.info("Extracting varchar columns - " + ",".join(varchar_cols))
+        varchar_node = self.get_varchar_node(varchar_cols)
+        tree_nodes.extend(varchar_node.values())
         # int/float columns
         numeric_cols = self.get_numeric_cols()
         if len(numeric_cols) > 0:
+            self.logger.info("Extracting numeric columns - " + ",".join(numeric_cols))
             numeric_nodes = self.get_numeric_nodes(numeric_cols)
         else:
             numeric_nodes = {}
@@ -391,12 +404,13 @@ class ModelTrainer(object):
         tree_nodes.extend(numeric_nodes.values())
         self.time_taken["get_model"] = (time.time() - START_TIME -
                                         self.time_taken["get_varchar_cols"] -
-                                        self.time_taken["get_varchar_nodes"] -
+                                        self.time_taken["get_varchar_node"] -
                                         self.time_taken["get_numeric_cols"] -
                                         self.time_taken["get_numeric_nodes"])
         # timestamp columns and columns whose parent is timestamp
         timestamp_cols = self.get_timestamp_cols()
         if len(timestamp_cols) > 0:
+            self.logger.info("Extracting timestamp columns - " + ",".join(timestamp_cols))
             timestamp_nodes = self.get_timestamp_nodes(timestamp_cols)
         tree_nodes.extend(timestamp_nodes.values())
         return tree_nodes

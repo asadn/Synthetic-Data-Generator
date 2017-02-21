@@ -6,12 +6,24 @@ from datagenerator.training.training_model import *
 from datetime import datetime
 import datetime
 from datagenerator.models.types import *
+import logging
+
+logger = logging.getLogger(__name__)
+logger.debug("Initialize")
+format_log = "%(asctime)s - %(name)s - [%(levelname)s] - %(message)s"
+logging.basicConfig(format = format_log, level=logging.DEBUG, filename="tests/logging_test.ini")
 
 """ Test Training """
 
 class TestTraining(object):
     @classmethod
     def setupClass(self):
+        # self.logger = logging.getLogger(__name__)
+        # self.logger.setLevel(logging.DEBUG)
+        # self.handler = logging.FileHandler("tests/logging_test.ini")
+        # self.handler.setLevel(logging.DEBUG)
+        # self.logger.addHandler(self.handler)
+        logger.debug("Setting up")
         filename = "tests/in_data/sub_webdata.csv"
         overrides = {"port":"varchar", "httpcode":"varchar"}
         dependencies = {"username":["timestamp"],
@@ -55,12 +67,13 @@ class TestTraining(object):
 
     def test_get_model(self):
         """ Test get_model function """
-        print("Finished extracting Proxy data.... Generating")
-        tree_data_proxy = Tree(self.training_data.model, self.training_data.header.keys())
-        records = tree_data_proxy.generate_data(_start=datetime.datetime.strptime("21/11/06 08:00", "%d/%m/%y %H:%M"),
-                                _end=datetime.datetime.strptime("21/12/06 00:00", "%d/%m/%y %H:%M"),filename="data.csv")
-        print("Finished generating data....")
-        assert_equal(len(records)>1, True)
+        logger.debug("Test get_model function")
+        logger.debug("Finished extracting Proxy data.... Generating")
+        # tree_data_proxy = Tree(self.training_data.model, self.training_data.header.keys())
+        # records = tree_data_proxy.generate_data(_start=datetime.datetime.strptime("2016-04-01 00:00", "%Y-%m-%d %H:%M"),
+        #                         _end=datetime.datetime.strptime("2016-05-30 00:00", "%Y-%m-%d %H:%M"),filename="data.csv")
+        # logger.debug("Finished generating data....")
+        # assert_equal(len(records)>1, True)
 
     def test_get_varchar_cols(self):
         """ Test get_varchar_cols function """
@@ -95,7 +108,8 @@ class TestTraining(object):
                            "bytesin":3, "bytesout":3, "httpcode":3, "httpmethod":3}
         assert_equal(returned_levels,expected_levels)
 
-    # def test_repo_data(self):
+    def test_repo_data(self):
+        logger.debug("Test get repo function")
         filename = "tests/in_data/RepoData.csv"
         overrides = {}
         repo_dependencies = {"user":["datetime"],
