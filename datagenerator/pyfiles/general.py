@@ -18,11 +18,12 @@ def kernel_density_estimate(value_list,points=None):
         return 0,{sum(value_list)/no_of_values: 1}
     # Generate bins
     if points is None:
-        bin_values = [int(v/bandwidth)*int(bandwidth)for v in value_list]
+        bin_values = [int(v/bandwidth)*bandwidth + float(bandwidth)/2  for v in value_list]
     else:
         bin_values = points
     # Get density for each bins
     densities = {}
+    bin_values = set(bin_values)
     for _bin in bin_values:
         densities[_bin] = get_density(value_list,bandwidth,_bin)
     return bandwidth,densities
@@ -63,3 +64,73 @@ def extract_weekminute_probs(weektime_counts,weekday_counts):
     for w_bucket in weektime_counts.keys():
             weektime_probs[w_bucket] = float(weektime_counts[w_bucket])/weekday_counts[int(w_bucket/(24*60))]
     return weektime_probs
+
+def bin_frequencies(value_list,points=None):
+    """ Returns KDE values and bandwidth for given list of numbers """
+    # Find bandwidth
+    # Use Silverman's rule of thumb to get bandwidth
+    no_of_values = len(value_list)
+    std_dev = np.std(value_list)
+    iqr = get_quartile_range(value_list) # Interquartile range
+    min_iqr_sd = min(std_dev,iqr)
+    bandwidth = min_iqr_sd*((float(4)/(3*no_of_values))**(1.0/5))
+    if bandwidth == 0:
+        return 0,{sum(value_list)/no_of_values: 1}
+    # Generate bins
+    if points is None:
+        bin_values = [int(v/bandwidth)*bandwidth  for v in value_list]
+    else:
+        bin_values = points
+    # Get density for each bins
+    densities = {}
+    number_of_ele = len(bin_values)
+    for _bin in bin_values:
+        densities[_bin] = float(bin_values.count(_bin))/number_of_ele
+    return bandwidth,densities
+
+
+def minute_gen(number_of_events):
+    """ Function that generates a list of minutes based on the number of events """
+    no_of_mins = 0
+    # For number of events less than 20, the number of minutes is
+    # randomly picked from a range zero to number of minutes
+    if(number_of_events <= 20):
+        no_of_mins = numpy.random.choice(range(1,number_of_events+1),1)
+    elif(number_of_events < 60):
+        p20 = 0.957
+        pOther = 0.043
+        min_interval = data_gen([20,60],[p20,pOther],1)
+        if(min_interval == 20):
+            no_of_mins = numpy.random.choice(range(1,21),1)
+        elif(min_interval == 60):
+            #print(number_of_events)
+            no_of_mins = numpy.random.choice(range(21,number_of_events+1),1)
+            #print(no_of_mins)
+    else:
+        if(number_of_events < 100):
+            p20 = 0.957
+            p40 = 0.036
+            p60 = 0.007
+        elif(number_of_events < 1000):
+            p20 = 0.7
+            p40 = 0.181
+            p60 = 0.119
+        else:
+            p20 = 0.146
+            p40 = 0.146
+            p60 = 0.708
+        #Select the interval of number of minutes in an hour
+        min_interval = data_gen([20,40,60],[p20,p40,p60],1)
+
+        # Select the number of minutes in an hour from the interval
+        if(min_interval == 20):
+            no_of_mins = numpy.random.choice(range(1,21),1)
+        elif(min_interval == 40):
+            no_of_mins = numpy.random.choice(range(21,41),1)
+        elif(min_interval == 60):
+            no_of_mins = numpy.random.choice(range(41,61),1)
+
+    # Generate n (number of events) minutes randomly uniformly from 0-59 minutes
+    mins = numpy.random.uniform(0,59,no_of_mins)
+    mins_array = list(numpy.random.choice(mins, number_of_events, replace = True))
+    return mins_array

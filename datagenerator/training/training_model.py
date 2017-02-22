@@ -6,38 +6,44 @@ import numpy as np
 from datagenerator.models.types import *
 from datagenerator.pyfiles.general import generate_hash_string
 from datagenerator.pyfiles.general import kernel_density_estimate
+from datagenerator.pyfiles.general import bin_frequencies
 from datagenerator.pyfiles.general import extract_weekminute_probs
 import logging
 
-# Set logging parameters
 
 class ModelTrainer(object):
     """ encapsulates the data and methods required to extract pattern from data"""
 
-    def __init__(self, filename, header, dependencies, timestamp_cols=None,
+    def __init__(self, filename, header, dependencies, timestamp_cols=[],
                  timestamp_format=None, overrides=None, logger=None):
         self.logger = logging.getLogger(__name__)
         self.logger.debug("Model trainer")
         self.logger.info("Extracting patterns from "+filename)
         self.time_taken = {}
-        # TODO: handle columns with NaN
+
+
         if header == "True":
             self.data = pd.DataFrame(pd.read_csv(filename, header=0))
         else:
             self.data = pd.read_csv(filename, header=None)
+        # TODO: handle columns with NaN
         self.data.fillna(0)
 
-        self.timestamp_cols = []
-        try:
-            for col in timestamp_cols:
-                if col not in map(str, tuple(self.data.columns)):
-                    self.logger.error(col + " is not present in header of given data")
-                    raise ValueError
-                else:
-                    self.timestamp_cols.append(col)
-        except ValueError:
-            self.logger.error("Timestamp column doesn't match columns in data header")
-            sys.exit(0)
+        if timestamp_cols is None:
+            self.root = "non-timestamp"
+        else:
+            self.root = "timestamp"
+            self.timestamp_cols = []
+            try:
+                for col in timestamp_cols:
+                    if col not in map(str, tuple(self.data.columns)):
+                        self.logger.error(col + " is not present in header of given data")
+                        raise ValueError
+                    else:
+                        self.timestamp_cols.append(col)
+            except ValueError:
+                self.logger.error("Timestamp column doesn't match columns in data header")
+                sys.exit(0)
 
         self.timestamp_format = timestamp_format
         self.get_header_dtypes(overrides)
@@ -256,8 +262,9 @@ class ModelTrainer(object):
                 row = pd.DataFrame([tuple(row.values)], columns=row.index)
                 sub_data = pd.merge(self.data[sub_cols], row, on=new_node.parents, how="inner")
                 # Get Kernel density estimates for given data
-                bandwidth, kde_vals = kernel_density_estimate(sub_data[col].tolist())
-
+                # bandwidth, kde_vals = kernel_density_estimate(sub_data[col].tolist())
+                bandwidth, kde_vals = bin_frequencies(sub_data[col].tolist())
+                self.logger.debug("bandwidth for parents "+parents_hash+" = "+str(bandwidth))
                 # Remove bins with 0 probability in kde_vals
                 for bin_val in kde_vals.keys():
                     if kde_vals[bin_val] < (0.000000000001):
@@ -384,6 +391,7 @@ class ModelTrainer(object):
         varchar_cols = self.get_varchar_cols()
         tree_nodes = []
         # remove varchar columns that has timestamp as parents
+
         for v_col in varchar_cols:
             for parent in self.dependencies[v_col]:
                 if self.header[parent] == "timestamp":
@@ -404,7 +412,7 @@ class ModelTrainer(object):
         tree_nodes.extend(numeric_nodes.values())
         self.time_taken["get_model"] = (time.time() - START_TIME -
                                         self.time_taken["get_varchar_cols"] -
-                                        self.time_taken["get_varchar_node"] -
+                                        self.time_taken["get_varchar_nodes"] -
                                         self.time_taken["get_numeric_cols"] -
                                         self.time_taken["get_numeric_nodes"])
         # timestamp columns and columns whose parent is timestamp
@@ -412,5 +420,8 @@ class ModelTrainer(object):
         if len(timestamp_cols) > 0:
             self.logger.info("Extracting timestamp columns - " + ",".join(timestamp_cols))
             timestamp_nodes = self.get_timestamp_nodes(timestamp_cols)
+        else:
+            timestamp_nodes = {}
+            self.time_taken["get_timestamp_nodes"] = 0
         tree_nodes.extend(timestamp_nodes.values())
         return tree_nodes

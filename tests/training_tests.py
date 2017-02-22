@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.debug("Initialize")
 format_log = "%(asctime)s - %(name)s - [%(levelname)s] - %(message)s"
-logging.basicConfig(format = format_log, level=logging.DEBUG, filename="tests/logging_test.ini")
+logging.basicConfig(format = format_log, level=logging.DEBUG, filename="tests/logs/test.log")
 
 """ Test Training """
 
@@ -25,6 +25,7 @@ class TestTraining(object):
         # self.logger.addHandler(self.handler)
         logger.debug("Setting up")
         filename = "tests/in_data/sub_webdata.csv"
+        # filename = "tests/in_data/webdata.csv"
         overrides = {"port":"varchar", "httpcode":"varchar"}
         dependencies = {"username":["timestamp"],
                         "timestamp":[],
@@ -69,11 +70,11 @@ class TestTraining(object):
         """ Test get_model function """
         logger.debug("Test get_model function")
         logger.debug("Finished extracting Proxy data.... Generating")
-        # tree_data_proxy = Tree(self.training_data.model, self.training_data.header.keys())
-        # records = tree_data_proxy.generate_data(_start=datetime.datetime.strptime("2016-04-01 00:00", "%Y-%m-%d %H:%M"),
-        #                         _end=datetime.datetime.strptime("2016-05-30 00:00", "%Y-%m-%d %H:%M"),filename="data.csv")
-        # logger.debug("Finished generating data....")
-        # assert_equal(len(records)>1, True)
+        tree_data_proxy = Tree(self.training_data.model, self.training_data.header.keys())
+        records = tree_data_proxy.generate_data(_start=datetime.datetime.strptime("2016-04-01 00:00", "%Y-%m-%d %H:%M"),
+                                _end=datetime.datetime.strptime("2016-05-30 00:00", "%Y-%m-%d %H:%M"),filename="data.csv")
+        logger.debug("Finished generating data....")
+        assert_equal(len(records)>1, True)
 
     def test_get_varchar_cols(self):
         """ Test get_varchar_cols function """
@@ -129,6 +130,34 @@ class TestTraining(object):
         repo_records = tree_data_repo.generate_data(_start=datetime.datetime.strptime("2016-04-01 00:00", "%Y-%m-%d %H:%M"),
                                 _end=datetime.datetime.strptime("2016-05-30 00:00", "%Y-%m-%d %H:%M"),filename="repodata.csv")
         assert_equal(len(repo_records)>1, True)
+
+
+    def test_non_ts_root_data(self):
+        logger.debug("Test get data with non-timestamp root function")
+        filename = "tests/in_data/web_no_timestamp.csv"
+        # filename = "tests/in_data/webdata.csv"
+        overrides = {"port":"varchar", "httpcode":"varchar"}
+        dependencies = {"username":[],
+                "agent":["username"],
+                "source":["username"],
+                "sourceip":["source"],
+                "url1":["username"],
+                "url2":["url1"],
+                "dest_ip":["url1"],
+                "port":["username"],
+                "bytesin":["url1"],
+                "bytesout":["url1"],
+                "httpcode":["username","url1"],
+                "httpmethod":["username","url1"]}
+        training_data = ModelTrainer(filename=filename,
+                                            header="True",
+                                            dependencies=dependencies,
+                                            overrides = overrides)
+        training_data.print_time_taken()
+
+        tree_data_nots = Tree(training_data.model, training_data.header.keys())
+        rnots_records = tree_data_nots.generate_data(counts=10000,filename="nots_webdata.csv")
+        assert_equal(len(rnots_records)>1, True)
 
     # def test_ad_data(self):
     #     filename = "tests/in_data/AD_data2.csv"

@@ -10,6 +10,7 @@ from datagenerator.pyfiles.general import generate_dates
 from datagenerator.pyfiles.general import generate_hash_string
 from collections import defaultdict
 import logging
+from math import fabs
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ class FloatCol(Column):
     def get_value(self, bin_val,bw):
         """ Returns a random value generated using the bin and bandwidth"""
         value = random.uniform(bin_val, bin_val+bw, 1)
-        #value = 4.5
+        # value = fabs(random.normal(bin_val,bw,1))
         return float(value)
 
     def generate_value(self,rec):
@@ -89,6 +90,7 @@ class IntCol(Column):
     def get_value(self, bin_val,bw):
         """ Returns a random value generated using the bin and bandwidth"""
         value = random.uniform(bin_val, bin_val+bw, 1)
+        # value = fabs(random.normal(bin_val,bw,1))
         return int(value)
 
     def generate_value(self,rec):
@@ -195,11 +197,11 @@ class Tree(object):
         for node in self.columns:
             col_dict[node.level].append(node)
 
-        root = col_dict[0][0]
-        if root == 'Null':
-            self.logger.error("Unable to retrieve root")
+        root = col_dict[0]
+        if root[0] == 'Null':
+            self.logger.error("Unable to retrieve")
             sys.exit(0)
-        if root.col_type == "timestamp":
+        if root[0].col_type == "timestamp":
             if (_start is None) or (_end is None):
                 self.logger.error("Please specify start and end dates")
                 sys.exit(0)
@@ -207,25 +209,38 @@ class Tree(object):
             dates = generate_dates(_start, _end)
             for _date in dates:
                 for _hour in range(0, 24):
-                    if root.time_bucket == "weekhour":
+                    if root[0].time_bucket == "weekhour":
                         wday = _date.weekday()
                         time_val = 24*60*wday + _hour*60
                         datetime_val = _date + timedelta(hours=_hour)
                         if ((_date + timedelta(hours = _hour) >= _start) and
                             (_date + timedelta(hours = _hour) <= _end)):
-                            records.extend(self.generate_ts_records(root, datetime_val, time_val))
+                            records.extend(self.generate_ts_records(root[0], datetime_val, time_val))
                     # In case of week minute add an else condition here
         else:
-            self.logger.error("Non timestamp root")
-            # TODO: Include the logic for non timestamp roots
-            # records = contain values of roots
-
+            if counts is None:
+                logger.error("Non timestamp root: Please provide number of records to be generated")
+            else:
+                for i in range(counts):
+                    new_record = {}
+                    for root_node in root:
+                        new_record[root_node.name]=data_genNorm(root_node.c_p_t.keys(),root_node.c_p_t.values(),1)
+                    records.append(new_record)
+                if len(records) > 1:
+                    logger.debug("Non-timestamp root data generated")
+                else:
+                    logger.debug("Failed to generate data for non-timestamp root")
         col_keys = (col_dict).keys()
         col_keys.sort()
         for rec in records:
             for level in col_keys:
-                if level > 1:
-                    for col in col_dict[level]:
-                        rec[col.name] = col.generate_value(rec)
+                if root[0].col_type == "timestamp":
+                    if level > 1:
+                        for col in col_dict[level]:
+                            rec[col.name] = col.generate_value(rec)
+                else:
+                    if level != 0:
+                        for col in col_dict[level]:
+                            rec[col.name] = col.generate_value(rec)
             self.generate_csv(rec,filename)
         return records
