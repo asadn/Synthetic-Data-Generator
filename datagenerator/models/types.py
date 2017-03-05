@@ -152,13 +152,16 @@ class Tree(object):
 
     def generate_csv(self,record,filename):
         out_file = open("tests/out_data/"+filename,"a")
-        record_value = record[self.header[0]]
-        for col_name in self.header[1:]:
-            record_value += "," + record[col_name]
-        out_file.write(record_value+"\n")
-        out_file.close()
+        try:
+            record_value = record[self.header[0]]
+            for col_name in self.header[1:]:
+                record_value += "," + record[col_name]
+            out_file.write(record_value+"\n")
+            out_file.close()
+        except KeyError:
+            logger.error("Key error" + ", ".join([record[key] for key in record.keys()]))
 
-    def generate_ts_records(self, root, datetime_val, time_val):
+    def generate_ts_records(self, root, datetime_val, time_val, non_ts_roots):
         """ Generate records with children for a given date and hour """
         tmp_records = []
         records = []
@@ -180,6 +183,13 @@ class Tree(object):
                 new_record[child] = r_val[_iter]
                 _iter += 1
                 new_record[root.name] = root.print_date(datetime_val)
+
+            #Generate values for other root nodes
+            if len(non_ts_roots) > 0:
+                for root_node in non_ts_roots:
+                    new_record[root_node.name] = data_genNorm(root_node.c_p_t.keys(),root_node.c_p_t.values(),1)
+                    if root_node.col_type != 'varchar':
+                        new_record[root_node.name] =  str(root_node.get_value(new_record[root_node.name],root_node.bandwidth))
             records.append(new_record)
         return records
 
@@ -197,25 +207,33 @@ class Tree(object):
         for node in self.columns:
             col_dict[node.level].append(node)
 
-        root = col_dict[0]
-        if root[0] == 'Null':
-            self.logger.error("Unable to retrieve")
-            sys.exit(0)
-        if root[0].col_type == "timestamp":
+        roots = col_dict[0]
+
+        #Check for timestamp root
+        has_ts_root = False
+        for node in roots:
+            if node.col_type == "timestamp":
+                has_ts_root = True
+                root_ts = node
+                break
+
+        if has_ts_root is True :
             if (_start is None) or (_end is None):
                 self.logger.error("Please specify start and end dates")
                 sys.exit(0)
-
+            non_ts_roots = [node for node in roots if node.col_type!="timestamp"]
+            logger.debug("Generating initial records with timestamp root "+ root_ts.name + "(ts) "+
+                          ", ".join([node.name for node in non_ts_roots])+ "(Non ts)")
             dates = generate_dates(_start, _end)
             for _date in dates:
                 for _hour in range(0, 24):
-                    if root[0].time_bucket == "weekhour":
+                    if root_ts.time_bucket == "weekhour":
                         wday = _date.weekday()
                         time_val = 24*60*wday + _hour*60
                         datetime_val = _date + timedelta(hours=_hour)
                         if ((_date + timedelta(hours = _hour) >= _start) and
                             (_date + timedelta(hours = _hour) <= _end)):
-                            records.extend(self.generate_ts_records(root[0], datetime_val, time_val))
+                            records.extend(self.generate_ts_records(root_ts, datetime_val, time_val, non_ts_roots))
                     # In case of week minute add an else condition here
         else:
             if counts is None:
@@ -223,21 +241,25 @@ class Tree(object):
             else:
                 for i in range(counts):
                     new_record = {}
-                    for root_node in root:
-                        new_record[root_node.name]=data_genNorm(root_node.c_p_t.keys(),root_node.c_p_t.values(),1)
+                    for root_node in roots:
+                        new_record[root_node.name] = data_genNorm(root_node.c_p_t.keys(),root_node.c_p_t.values(),1)
+                        if root_node.col_type != 'varchar':
+                            new_record[root_node.name] =  str(root_node.get_value(new_record[root_node.name],root_node.bandwidth))
                     records.append(new_record)
                 if len(records) > 1:
                     logger.debug("Non-timestamp root data generated")
                 else:
                     logger.debug("Failed to generate data for non-timestamp root")
+
         col_keys = (col_dict).keys()
         col_keys.sort()
         for rec in records:
             for level in col_keys:
-                if root[0].col_type == "timestamp":
-                    if level > 1:
+                if has_ts_root is True:
+                    if level > 0:
                         for col in col_dict[level]:
-                            rec[col.name] = col.generate_value(rec)
+                            if has_ts_root is False or root_ts.name not in col.parents:
+                                rec[col.name] = col.generate_value(rec)
                 else:
                     if level != 0:
                         for col in col_dict[level]:

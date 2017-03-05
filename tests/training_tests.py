@@ -18,13 +18,8 @@ logging.basicConfig(format = format_log, level=logging.DEBUG, filename="tests/lo
 class TestTraining(object):
     @classmethod
     def setupClass(self):
-        # self.logger = logging.getLogger(__name__)
-        # self.logger.setLevel(logging.DEBUG)
-        # self.handler = logging.FileHandler("tests/logging_test.ini")
-        # self.handler.setLevel(logging.DEBUG)
-        # self.logger.addHandler(self.handler)
         logger.debug("Setting up")
-        filename = "tests/in_data/sub_webdata.csv"
+        filename = "tests/in_data/webdata_2users.csv"
         # filename = "tests/in_data/webdata.csv"
         overrides = {"port":"varchar", "httpcode":"varchar"}
         dependencies = {"username":["timestamp"],
@@ -110,14 +105,14 @@ class TestTraining(object):
         assert_equal(returned_levels,expected_levels)
 
     def test_repo_data(self):
-        logger.debug("Test get repo function")
+        logger.debug("\n\nTest get data with repo dataset\n=================\n")
         filename = "tests/in_data/RepoData.csv"
         overrides = {}
         repo_dependencies = {"user":["datetime"],
                         "datetime":[],
                         "ip_address":["user"],
-                        "action":["user","destination"],
-                        "destination":["user"]}
+                        "action":["destination"],
+                        "destination":[]}
         repo_training_data = ModelTrainer(filename=filename,
                                     header="True",
                                     dependencies=repo_dependencies,
@@ -129,26 +124,47 @@ class TestTraining(object):
         tree_data_repo = Tree(repo_training_data.model, repo_training_data.header.keys())
         repo_records = tree_data_repo.generate_data(_start=datetime.datetime.strptime("2016-04-01 00:00", "%Y-%m-%d %H:%M"),
                                 _end=datetime.datetime.strptime("2016-05-30 00:00", "%Y-%m-%d %H:%M"),filename="repodata.csv")
+        logger.debug("...Finished Generating Repo data")
         assert_equal(len(repo_records)>1, True)
 
 
-    def test_non_ts_root_data(self):
-        logger.debug("Test get data with non-timestamp root function")
-        filename = "tests/in_data/web_no_timestamp.csv"
+    # def test_non_ts_root_data(self):
+    #     logger.debug("Test get data with non-timestamp root function")
+    #     filename = "tests/in_data/web_no_timestamp.csv"
+    #     # filename = "tests/in_data/webdata.csv"
+    #     overrides = {"port":"varchar", "httpcode":"varchar"}
+    #     dependencies = {"username":[],
+    #             "agent":["username"],
+    #             "source":["username"],
+    #             "sourceip":["source"],
+    #             "url1":["username"],
+    #             "url2":["url1"],
+    #             "dest_ip":["url1"],
+    #             "port":["username"],
+    #             "bytesin":["url1"],
+    #             "bytesout":["url1"],
+    #             "httpcode":["username","url1"],
+    #             "httpmethod":["username","url1"]}
+    #     training_data = ModelTrainer(filename=filename,
+    #                                         header="True",
+    #                                         dependencies=dependencies,
+    #                                         overrides = overrides)
+    #     training_data.print_time_taken()
+    #
+    #     tree_data_nots = Tree(training_data.model, training_data.header.keys())
+    #     rnots_records = tree_data_nots.generate_data(counts=10000,filename="nots_webdata.csv")
+    #     assert_equal(len(rnots_records)>1, True)
+
+    def test_iris_data(self):
+        logger.debug("\n\nTest get data with iris dataset\n=================\n")
+        filename = "tests/in_data/irisdata.csv"
         # filename = "tests/in_data/webdata.csv"
-        overrides = {"port":"varchar", "httpcode":"varchar"}
-        dependencies = {"username":[],
-                "agent":["username"],
-                "source":["username"],
-                "sourceip":["source"],
-                "url1":["username"],
-                "url2":["url1"],
-                "dest_ip":["url1"],
-                "port":["username"],
-                "bytesin":["url1"],
-                "bytesout":["url1"],
-                "httpcode":["username","url1"],
-                "httpmethod":["username","url1"]}
+        overrides = {}
+        dependencies = {"class":[],
+                "sepal_length":[],
+                "sepal_width":[],
+                "petal_length":[],
+                "petal_width":[]}
         training_data = ModelTrainer(filename=filename,
                                             header="True",
                                             dependencies=dependencies,
@@ -156,16 +172,17 @@ class TestTraining(object):
         training_data.print_time_taken()
 
         tree_data_nots = Tree(training_data.model, training_data.header.keys())
-        rnots_records = tree_data_nots.generate_data(counts=10000,filename="nots_webdata.csv")
+        rnots_records = tree_data_nots.generate_data(counts=150,filename="irisdata_syn.csv")
         assert_equal(len(rnots_records)>1, True)
 
     # def test_ad_data(self):
+    #     logger.debug("\n\nTest get data with AD dataset\n=================\n")
     #     filename = "tests/in_data/AD_data2.csv"
     #     overrides = {"externalId":"varchar","pages":"varchar","bytes":"varchar"}
     #     dependencies = {"userId":["deviceReceiptTime"],
     #                     "categoryOutcome":["userId","externalId","destination"],
     #                     "externalId":["userId","destination"],
-    #                     "destination":["userId"],
+    #                     "destination":[],
     #                     "objectType":["objName"],
     #                     "objName":["userId","externalId"],
     #                     "calling_st_ID":["userId","externalId"],
@@ -183,8 +200,9 @@ class TestTraining(object):
     #                                 timestamp_format=['%Y-%m-%d %H:%M:%S'],
     #                                 overrides = overrides)
     #     repo_training_data.print_time_taken()
-    #     print("Finished extracting AD data.... Generating")
+    #     logger.debug("Finished extracting AD data.... Generating")
     #     ad_tree_data = Tree(repo_training_data.model, repo_training_data.header.keys())
     #     records = ad_tree_data.generate_data(_start=datetime.datetime.strptime("21/11/06 08:00", "%d/%m/%y %H:%M"),
     #                             _end=datetime.datetime.strptime("21/12/06 00:00", "%d/%m/%y %H:%M"),filename="ADdata.csv")
+    #     logger.debug("Finished Generating AD data")
     #     assert_equal(len(records)>1, True)

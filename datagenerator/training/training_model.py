@@ -240,7 +240,7 @@ class ModelTrainer(object):
                                   name=col,
                                   position=(list(self.data.columns)).index(col),
                                   level=self.levels[col],
-                                  is_root="No",
+                                  is_root=("Yes" if (self.levels[col] == 0) else "No"),
                                   parents=self.dependencies[col],
                                   parentscount={})
             elif self.header[col] == "float":
@@ -249,38 +249,38 @@ class ModelTrainer(object):
                                     name=col,
                                     position=(list(self.data.columns)).index(col),
                                     level=self.levels[col],
-                                    is_root="No",
+                                    is_root=("Yes" if (self.levels[col] == 0) else "No"),
                                     parents=self.dependencies[col],
                                     parentscount={})
 
             sub_cols = [col]
-            sub_cols.extend(new_node.parents)
-            distinct_parents = self.data[new_node.parents].drop_duplicates()
-            for index, row in distinct_parents.iterrows():
-                # as values for key hash(parents)
-                parents_hash = generate_hash_string(row, new_node.parents)
-                row = pd.DataFrame([tuple(row.values)], columns=row.index)
-                sub_data = pd.merge(self.data[sub_cols], row, on=new_node.parents, how="inner")
-                # Get Kernel density estimates for given data
+            if int(new_node.level) != 0:
+                sub_cols.extend(new_node.parents)
+                distinct_parents = self.data[new_node.parents].drop_duplicates()
+                for index, row in distinct_parents.iterrows():
+                    # as values for key hash(parents)
+                    parents_hash = generate_hash_string(row, new_node.parents)
+                    row = pd.DataFrame([tuple(row.values)], columns=row.index)
+                    sub_data = pd.merge(self.data[sub_cols], row, on=new_node.parents, how="inner")
+                    # Get Kernel density estimates for given data
+                    # bandwidth, kde_vals = kernel_density_estimate(sub_data[col].tolist())
+                    bandwidth, kde_vals = bin_frequencies(sub_data[col].tolist())
+                    self.logger.debug("bandwidth for parents "+parents_hash+" = "+str(bandwidth))
+                    # Remove bins with 0 probability in kde_vals
+                    for bin_val in kde_vals.keys():
+                        if kde_vals[bin_val] < (0.000000000001):
+                            del kde_vals[bin_val]
+
+                    new_node.c_p_t[parents_hash] = kde_vals
+                    new_node.bandwidth[parents_hash] = bandwidth
+            else:
+                self.logger.debug("Extracting independent numeric col "+ col)
                 # bandwidth, kde_vals = kernel_density_estimate(sub_data[col].tolist())
-                bandwidth, kde_vals = bin_frequencies(sub_data[col].tolist())
-                self.logger.debug("bandwidth for parents "+parents_hash+" = "+str(bandwidth))
-                # Remove bins with 0 probability in kde_vals
-                for bin_val in kde_vals.keys():
-                    if kde_vals[bin_val] < (0.000000000001):
-                        del kde_vals[bin_val]
+                bandwidth, kde_vals = bin_frequencies(self.data[col].tolist())
+                self.logger.debug("bandwidth of "+col+" = "+str(bandwidth)+"\n")
+                new_node.c_p_t = kde_vals
+                new_node.bandwidth = bandwidth
 
-
-
-                # print row
-                # print new_node.parents
-                # print parents_hash
-                # if len(kde_vals) == 0:
-                #     print "Empty kde ",sub_data[col].tolist()
-                # else:
-                #     print kde_vals
-                new_node.c_p_t[parents_hash] = kde_vals
-                new_node.bandwidth[parents_hash] = bandwidth
             node_data[col] = new_node
         self.time_taken["get_numeric_nodes"] = (time.time() - START_TIME)
         return node_data
@@ -323,7 +323,7 @@ class ModelTrainer(object):
 
         # return_data = node_data[root_node].children
 
-        for child in node_data[root_node].children:
+        for child in node_data[root_node].children: # Parallelize
             sub_cols = [root_node,child]
             child_vals = self.data[child].unique()
             for child_value in child_vals:
