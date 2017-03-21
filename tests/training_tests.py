@@ -61,15 +61,15 @@ class TestTraining(object):
 
 
 
-    def test_get_model(self):
-        """ Test get_model function """
-        logger.debug("Test get_model function")
-        logger.debug("Finished extracting Proxy data.... Generating")
-        tree_data_proxy = Tree(self.training_data.model, self.training_data.header.keys())
-        records = tree_data_proxy.generate_data(_start=datetime.datetime.strptime("2016-04-01 00:00", "%Y-%m-%d %H:%M"),
-                                _end=datetime.datetime.strptime("2016-05-30 00:00", "%Y-%m-%d %H:%M"),filename="data.csv")
-        logger.debug("Finished generating data....")
-        assert_equal(len(records)>1, True)
+    # def test_get_model(self):
+    #     """ Test get_model function """
+    #     logger.debug("Test get_model function")
+    #     logger.debug("Finished extracting Proxy data.... Generating")
+    #     tree_data_proxy = Tree(self.training_data.model, self.training_data.header.keys())
+    #     records = tree_data_proxy.generate_data(_start=datetime.datetime.strptime("2016-04-01 00:00", "%Y-%m-%d %H:%M"),
+    #                             _end=datetime.datetime.strptime("2016-05-30 00:00", "%Y-%m-%d %H:%M"),filename="data.csv")
+    #     logger.debug("Finished generating data....")
+    #     assert_equal(len(records)>1, True)
 
     def test_get_varchar_cols(self):
         """ Test get_varchar_cols function """
@@ -104,28 +104,28 @@ class TestTraining(object):
                            "bytesin":3, "bytesout":3, "httpcode":3, "httpmethod":3}
         assert_equal(returned_levels,expected_levels)
 
-    def test_repo_data(self):
-        logger.debug("\n\nTest get data with repo dataset\n=================\n")
-        filename = "tests/in_data/RepoData.csv"
-        overrides = {}
-        repo_dependencies = {"user":["datetime"],
-                        "datetime":[],
-                        "ip_address":["user"],
-                        "action":["destination"],
-                        "destination":[]}
-        repo_training_data = ModelTrainer(filename=filename,
-                                    header="True",
-                                    dependencies=repo_dependencies,
-                                    timestamp_cols=['datetime'],
-                                    timestamp_format='%Y-%m-%d %H:%M:%S',
-                                    overrides = overrides)
-        repo_training_data.print_time_taken()
-
-        tree_data_repo = Tree(repo_training_data.model, repo_training_data.header.keys())
-        repo_records = tree_data_repo.generate_data(_start=datetime.datetime.strptime("2016-04-01 00:00", "%Y-%m-%d %H:%M"),
-                                _end=datetime.datetime.strptime("2016-05-30 00:00", "%Y-%m-%d %H:%M"),filename="repodata.csv")
-        logger.debug("...Finished Generating Repo data")
-        assert_equal(len(repo_records)>1, True)
+    # def test_repo_data(self):
+    #     logger.debug("\n\nTest get data with repo dataset\n=================\n")
+    #     filename = "tests/in_data/RepoData.csv"
+    #     overrides = {}
+    #     repo_dependencies = {"user":["datetime"],
+    #                     "datetime":[],
+    #                     "ip_address":["user"],
+    #                     "action":["destination"],
+    #                     "destination":[]}
+    #     repo_training_data = ModelTrainer(filename=filename,
+    #                                 header="True",
+    #                                 dependencies=repo_dependencies,
+    #                                 timestamp_cols=['datetime'],
+    #                                 timestamp_format='%Y-%m-%d %H:%M:%S',
+    #                                 overrides = overrides)
+    #     repo_training_data.print_time_taken()
+    #
+    #     tree_data_repo = Tree(repo_training_data.model, repo_training_data.header.keys())
+    #     repo_records = tree_data_repo.generate_data(_start=datetime.datetime.strptime("2016-04-01 00:00", "%Y-%m-%d %H:%M"),
+    #                             _end=datetime.datetime.strptime("2016-05-30 00:00", "%Y-%m-%d %H:%M"),filename="repodata.csv")
+    #     logger.debug("...Finished Generating Repo data")
+    #     assert_equal(len(repo_records)>1, True)
 
 
     # def test_non_ts_root_data(self):
@@ -154,7 +154,7 @@ class TestTraining(object):
     #     tree_data_nots = Tree(training_data.model, training_data.header.keys())
     #     rnots_records = tree_data_nots.generate_data(counts=10000,filename="nots_webdata.csv")
     #     assert_equal(len(rnots_records)>1, True)
-
+    #
     def test_iris_data(self):
         logger.debug("\n\nTest get data with iris dataset\n=================\n")
         filename = "tests/in_data/irisdata.csv"
@@ -177,7 +177,7 @@ class TestTraining(object):
 
     # def test_ad_data(self):
     #     logger.debug("\n\nTest get data with AD dataset\n=================\n")
-    #     filename = "tests/in_data/AD_data2.csv"
+    #     filename = "tests/in_data/AD_data.csv"
     #     overrides = {"externalId":"varchar","pages":"varchar","bytes":"varchar"}
     #     dependencies = {"userId":["deviceReceiptTime"],
     #                     "categoryOutcome":["userId","externalId","destination"],
@@ -186,18 +186,14 @@ class TestTraining(object):
     #                     "objectType":["objName"],
     #                     "objName":["userId","externalId"],
     #                     "calling_st_ID":["userId","externalId"],
-    #                     "pages":["userId"],
-    #                     "bytes":["userId"],
     #                     "country":["userId","externalId"],
-    #                     "deviceReceiptTime":[],
-    #                     "name":["externalId"],
-    #                     "deviceEventClassId":["externalId"]}
+    #                     "deviceReceiptTime":[]}
     #     print("Extracting AD data....")
     #     repo_training_data = ModelTrainer(filename=filename,
     #                                 header="True",
     #                                 dependencies=dependencies,
     #                                 timestamp_cols=['deviceReceiptTime'],
-    #                                 timestamp_format=['%Y-%m-%d %H:%M:%S'],
+    #                                 timestamp_format=['%Y-%m-%dT%H:%M:%S'],
     #                                 overrides = overrides)
     #     repo_training_data.print_time_taken()
     #     logger.debug("Finished extracting AD data.... Generating")

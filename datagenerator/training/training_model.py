@@ -9,6 +9,7 @@ from datagenerator.pyfiles.general import kernel_density_estimate
 from datagenerator.pyfiles.general import bin_frequencies
 from datagenerator.pyfiles.general import extract_weekminute_probs
 import logging
+import json
 
 
 class ModelTrainer(object):
@@ -50,6 +51,14 @@ class ModelTrainer(object):
         self.dependencies = dependencies
         self.levels = self.get_level()
         self.model = self.get_model()
+        self.write_model(filename)
+
+    def write_model(self,filename):
+        fw = open(filename+"_model.json","w")
+        for col in self.model:
+            self.logger.debug("writing json of "+col.name)
+            fw.write(str(col.__dict__) + "\n")
+        fw.close()
 
     def print_time_taken(self):
         for time_key in self.time_taken.keys():
@@ -233,6 +242,7 @@ class ModelTrainer(object):
         node_data = {}
         print numeric_cols
         # Define columns of type IntCol/ FloatCol
+        sub_cols = []
         for col in numeric_cols:
             if self.header[col] == "int":
                 new_node = IntCol(bandwidth={},
@@ -252,39 +262,64 @@ class ModelTrainer(object):
                                     is_root=("Yes" if (self.levels[col] == 0) else "No"),
                                     parents=self.dependencies[col],
                                     parentscount={})
-
-            sub_cols = [col]
-            if int(new_node.level) != 0:
-                sub_cols.extend(new_node.parents)
-                distinct_parents = self.data[new_node.parents].drop_duplicates()
-                for index, row in distinct_parents.iterrows():
-                    # as values for key hash(parents)
-                    parents_hash = generate_hash_string(row, new_node.parents)
-                    row = pd.DataFrame([tuple(row.values)], columns=row.index)
-                    sub_data = pd.merge(self.data[sub_cols], row, on=new_node.parents, how="inner")
-                    # Get Kernel density estimates for given data
-                    # bandwidth, kde_vals = kernel_density_estimate(sub_data[col].tolist())
-                    bandwidth, kde_vals = bin_frequencies(sub_data[col].tolist())
-                    self.logger.debug("bandwidth for parents "+parents_hash+" = "+str(bandwidth))
-                    # Remove bins with 0 probability in kde_vals
-                    for bin_val in kde_vals.keys():
-                        if kde_vals[bin_val] < (0.000000000001):
-                            del kde_vals[bin_val]
-
-                    new_node.c_p_t[parents_hash] = kde_vals
-                    new_node.bandwidth[parents_hash] = bandwidth
-            else:
-                self.logger.debug("Extracting independent numeric col "+ col)
-                # bandwidth, kde_vals = kernel_density_estimate(sub_data[col].tolist())
-                bandwidth, kde_vals = bin_frequencies(self.data[col].tolist())
-                self.logger.debug("bandwidth of "+col+" = "+str(bandwidth)+"\n")
-                new_node.c_p_t = kde_vals
-                new_node.bandwidth = bandwidth
-
+            sub_cols.extend(self.dependencies[col])
+            sub_cols.append(col)
             node_data[col] = new_node
+
+        sub_cols = list(set(sub_cols))
+        distinctparentsdata = {}
+
+        """ Extract value list for each parent combination """
+
+        for index, row in self.data[sub_cols].iterrows():
+            for col in numeric_cols:
+                if node_data[col].level !=0:
+                    parents_hash = generate_hash_string(row, node_data[col].parents)
+                    if distinctparentsdata.has_key(col):
+                        if distinctparentsdata[col].has_key(parents_hash):
+                            distinctparentsdata[col][parents_hash].append(row[col])
+                        else:
+                            distinctparentsdata[col][parents_hash] = [row[col]]
+                    else:
+                        distinctparentsdata[col] = {}
+                        distinctparentsdata[col][parents_hash] = [row[col]]
+                else:
+                    if distinctparentsdata.has_key(col):
+                        distinctparentsdata[col].append(row[col])
+                    else:
+                        distinctparentsdata[col] = [row[col]]
+
+        """ Extract probability and bandwidth """
+
+        for col in numeric_cols:
+            if node_data[col].level !=0:
+                for parentskey in distinctparentsdata[col].keys():
+                    # Get Kernel density estimates for given data
+                    # bandwidth, kde_vals = kernel_density_estimate(distinctparentsdata[col][parentskey])
+                    bandwidth, kde_vals = bin_frequencies(distinctparentsdata[col][parentskey])
+
+                    self.logger.debug("bandwidth for parents "+parentskey+" = "+str(bandwidth))
+                    # Remove bins with 0 probability in kde_vals
+                    # for bin_val in kde_vals.keys():
+                    #     if kde_vals[bin_val] < (0.000000000001):
+                    #         del kde_vals[bin_val]
+
+                    node_data[col].c_p_t[parentskey] = kde_vals
+                    node_data[col].bandwidth[parentskey] = bandwidth
+            else:
+                    bandwidth, kde_vals = bin_frequencies(distinctparentsdata[col])
+
+                    self.logger.debug("bandwidth for"+col+" = "+str(bandwidth))
+                    # Remove bins with 0 probability in kde_vals
+                    # for bin_val in kde_vals.keys():
+                    #     if kde_vals[bin_val] < (0.000000000001):
+                    #         del kde_vals[bin_val]
+
+                    node_data[col].c_p_t = kde_vals
+                    node_data[col].bandwidth = bandwidth
+
         self.time_taken["get_numeric_nodes"] = (time.time() - START_TIME)
         return node_data
-
 
     def get_timestamp_nodes(self, timestamp_cols):
         """ Extract patterns and store it in type IntCol/ FloatCol """

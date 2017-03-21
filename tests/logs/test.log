@@ -1,0 +1,344 @@
+2017-03-20 15:15:30,070 - tests.training_tests - [DEBUG] - Initialize
+2017-03-20 15:15:30,076 - datagenerator.models.types - [ERROR] - invalid type in ProbabilityDist
+2017-03-20 15:15:30,076 - datagenerator.models.types - [ERROR] - invalid value in ProbabilityDist
+2017-03-20 15:15:30,076 - tests.DataGenerator_tests - [INFO] - Testing datageneration with non-timestamp roots
+2017-03-20 15:15:32,324 - datagenerator.models.types - [DEBUG] - Non-timestamp root data generated
+2017-03-20 15:15:44,078 - tests.DataGenerator_tests - [INFO] - Testing datageneration with non-timestamp roots complete
+2017-03-20 15:15:44,090 - tests.training_tests - [DEBUG] - Setting up
+2017-03-20 15:15:44,090 - datagenerator.training.training_model - [DEBUG] - Model trainer
+2017-03-20 15:15:44,090 - datagenerator.training.training_model - [INFO] - Extracting patterns from tests/in_data/webdata_2users.csv
+2017-03-20 15:15:44,384 - datagenerator.training.training_model - [DEBUG] - Extracted types for columns : username:varchar bytesout:int timestamp:timestamp httpmethod:varchar agent:varchar httpcode:varchar source:varchar url1:varchar url2:varchar bytesin:int sourceip:varchar port:varchar dest_ip:varchar
+2017-03-20 15:15:44,384 - datagenerator.training.training_model - [DEBUG] - Extracted levels for columns : username:1 httpmethod:3 timestamp:0 bytesout:3 agent:2 httpcode:3 source:2 url1:2 url2:3 bytesin:3 sourceip:3 port:2 dest_ip:3
+2017-03-20 15:15:44,385 - datagenerator.training.training_model - [INFO] - Extracting varchar columns - httpmethod,agent,httpcode,source,url1,url2,sourceip,port,dest_ip
+2017-03-20 15:16:20,632 - datagenerator.training.training_model - [INFO] - Extracting numeric columns - bytesout,bytesin
+2017-03-20 15:16:31,364 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Statcounter.com = 58.0731884979
+2017-03-20 15:16:31,796 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Addthis.com = 58.2072918953
+2017-03-20 15:16:32,357 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://storm.helix.com/ = 57.5760264873
+2017-03-20 15:16:34,386 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vk.com = 50.1501830449
+2017-03-20 15:16:34,847 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vimeo.com = 58.4337976738
+2017-03-20 15:16:35,242 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://elastic.helix.com = 59.4382216348
+2017-03-20 15:16:35,773 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents https://www.linkedin.com/ = 57.829149264
+2017-03-20 15:16:36,294 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Yahoo.com = 57.262713162
+2017-03-20 15:16:36,711 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Traffic.cn = 58.1063246138
+2017-03-20 15:16:37,193 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://www.cnn.com/ = 57.5855966197
+2017-03-20 15:16:37,596 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Youtube.com = 58.1953283373
+2017-03-20 15:16:38,023 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Digg.com = 58.9410597791
+2017-03-20 15:16:38,429 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents Amazonaws.com = 59.0852171433
+2017-03-20 15:16:38,924 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Feedburner.com = 56.9947412583
+2017-03-20 15:16:39,472 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Flickr.com = 57.4678508797
+2017-03-20 15:16:39,958 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Buydomains.com = 57.5121208024
+2017-03-20 15:16:40,380 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Statcounter.com = 58.5846349872
+2017-03-20 15:16:40,795 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Addthis.com = 58.4462322592
+2017-03-20 15:16:41,345 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://storm.helix.com/ = 57.4478390752
+2017-03-20 15:16:43,389 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vk.com = 49.881049629
+2017-03-20 15:16:43,853 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vimeo.com = 58.4511906021
+2017-03-20 15:16:44,267 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://elastic.helix.com = 294867.95265
+2017-03-20 15:16:44,807 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents https://www.linkedin.com/ = 57.1537045143
+2017-03-20 15:16:45,334 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Yahoo.com = 56.758492856
+2017-03-20 15:16:45,745 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Traffic.cn = 58.5643288269
+2017-03-20 15:16:46,257 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://www.cnn.com/ = 57.4674160595
+2017-03-20 15:16:46,674 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Youtube.com = 58.8759804782
+2017-03-20 15:16:47,106 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Digg.com = 58.5157696223
+2017-03-20 15:16:47,514 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents Amazonaws.com = 58.5179918307
+2017-03-20 15:16:48,012 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Feedburner.com = 56.9970747515
+2017-03-20 15:16:48,560 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Flickr.com = 56.6332269589
+2017-03-20 15:16:49,056 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Buydomains.com = 58.0031717873
+2017-03-20 15:16:49,058 - datagenerator.training.training_model - [INFO] - Extracting timestamp columns - username,timestamp
+2017-03-20 15:16:51,017 - datagenerator.training.training_model - [DEBUG] - writing json of source
+2017-03-20 15:16:51,017 - datagenerator.training.training_model - [DEBUG] - writing json of agent
+2017-03-20 15:16:51,017 - datagenerator.training.training_model - [DEBUG] - writing json of httpcode
+2017-03-20 15:16:51,018 - datagenerator.training.training_model - [DEBUG] - writing json of httpmethod
+2017-03-20 15:16:51,018 - datagenerator.training.training_model - [DEBUG] - writing json of url1
+2017-03-20 15:16:51,018 - datagenerator.training.training_model - [DEBUG] - writing json of url2
+2017-03-20 15:16:51,018 - datagenerator.training.training_model - [DEBUG] - writing json of sourceip
+2017-03-20 15:16:51,018 - datagenerator.training.training_model - [DEBUG] - writing json of port
+2017-03-20 15:16:51,018 - datagenerator.training.training_model - [DEBUG] - writing json of dest_ip
+2017-03-20 15:16:51,018 - datagenerator.training.training_model - [DEBUG] - writing json of bytesin
+2017-03-20 15:16:51,020 - datagenerator.training.training_model - [DEBUG] - writing json of bytesout
+2017-03-20 15:16:51,021 - datagenerator.training.training_model - [DEBUG] - writing json of username
+2017-03-20 15:16:51,021 - datagenerator.training.training_model - [DEBUG] - writing json of timestamp
+2017-03-20 15:16:51,022 - datagenerator.training.training_model - [INFO] - get_level:0.000178098678589
+2017-03-20 15:16:51,022 - datagenerator.training.training_model - [INFO] - get_timestamp_cols:1.69277191162e-05
+2017-03-20 15:16:51,022 - datagenerator.training.training_model - [INFO] - get_timestamp_nodes:1.95836901665
+2017-03-20 15:16:51,022 - datagenerator.training.training_model - [INFO] - get_varchar_cols:3.69548797607e-05
+2017-03-20 15:16:51,022 - datagenerator.training.training_model - [INFO] - get_varchar_nodes:36.2452428341
+2017-03-20 15:16:51,022 - datagenerator.training.training_model - [INFO] - get_model:0.00416827201843
+2017-03-20 15:16:51,022 - datagenerator.training.training_model - [INFO] - get_numeric_cols:1.19209289551e-05
+2017-03-20 15:16:51,022 - datagenerator.training.training_model - [INFO] - get_numeric_nodes:28.4239420891
+2017-03-20 15:16:51,022 - datagenerator.training.training_model - [INFO] - get_header_dtypes:0.0221049785614
+2017-03-20 15:16:51,022 - datagenerator.training.training_model - [INFO] - Total time :66.6540710926
+2017-03-20 15:16:51,023 - tests.training_tests - [DEBUG] - 
+
+Test get data with AD dataset
+=================
+
+2017-03-20 15:16:51,023 - datagenerator.training.training_model - [DEBUG] - Model trainer
+2017-03-20 15:16:51,023 - datagenerator.training.training_model - [INFO] - Extracting patterns from tests/in_data/AD_data.csv
+2017-03-20 15:16:51,966 - datagenerator.training.training_model - [DEBUG] - Extracted types for columns : categoryOutcome:varchar country:float destination:varchar userId:varchar deviceReceiptTime:timestamp calling_st_ID:float externalId:varchar objName:float objectType:float
+2017-03-20 15:16:51,966 - datagenerator.training.training_model - [DEBUG] - Extracted levels for columns : categoryOutcome:3 calling_st_ID:3 country:3 destination:0 userId:1 deviceReceiptTime:0 externalId:2 objName:3 objectType:4
+2017-03-20 15:16:51,966 - datagenerator.training.training_model - [INFO] - Extracting varchar columns - categoryOutcome,destination,externalId
+2017-03-20 15:18:22,670 - datagenerator.training.training_model - [INFO] - objectType has a numeric parent!!
+2017-03-20 15:18:22,672 - datagenerator.training.training_model - [DEBUG] - Extracted levels for columns : username:1 httpmethod:3 timestamp:0 bytesout:3 agent:2 httpcode:3 source:2 url1:2 url2:3 bytesin:3 sourceip:3 port:2 dest_ip:3
+2017-03-20 15:28:36,021 - tests.training_tests - [DEBUG] - Initialize
+2017-03-20 15:28:36,028 - datagenerator.models.types - [ERROR] - invalid type in ProbabilityDist
+2017-03-20 15:28:36,028 - datagenerator.models.types - [ERROR] - invalid value in ProbabilityDist
+2017-03-20 15:28:36,029 - tests.DataGenerator_tests - [INFO] - Testing datageneration with non-timestamp roots
+2017-03-20 15:28:38,306 - datagenerator.models.types - [DEBUG] - Non-timestamp root data generated
+2017-03-20 15:28:50,039 - tests.DataGenerator_tests - [INFO] - Testing datageneration with non-timestamp roots complete
+2017-03-20 15:28:50,049 - tests.training_tests - [DEBUG] - Setting up
+2017-03-20 15:28:50,049 - datagenerator.training.training_model - [DEBUG] - Model trainer
+2017-03-20 15:28:50,049 - datagenerator.training.training_model - [INFO] - Extracting patterns from tests/in_data/webdata_2users.csv
+2017-03-20 15:28:50,365 - datagenerator.training.training_model - [DEBUG] - Extracted types for columns : username:varchar bytesout:int timestamp:timestamp httpmethod:varchar agent:varchar httpcode:varchar source:varchar url1:varchar url2:varchar bytesin:int sourceip:varchar port:varchar dest_ip:varchar
+2017-03-20 15:28:50,365 - datagenerator.training.training_model - [DEBUG] - Extracted levels for columns : username:1 httpmethod:3 timestamp:0 bytesout:3 agent:2 httpcode:3 source:2 url1:2 url2:3 bytesin:3 sourceip:3 port:2 dest_ip:3
+2017-03-20 15:28:50,365 - datagenerator.training.training_model - [INFO] - Extracting varchar columns - httpmethod,agent,httpcode,source,url1,url2,sourceip,port,dest_ip
+2017-03-20 15:29:27,250 - datagenerator.training.training_model - [INFO] - Extracting numeric columns - bytesout,bytesin
+2017-03-20 15:29:38,429 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Statcounter.com = 58.0731884979
+2017-03-20 15:29:38,854 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Addthis.com = 58.2072918953
+2017-03-20 15:29:39,395 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://storm.helix.com/ = 57.5760264873
+2017-03-20 15:29:41,459 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vk.com = 50.1501830449
+2017-03-20 15:29:41,927 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vimeo.com = 58.4337976738
+2017-03-20 15:29:42,336 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://elastic.helix.com = 59.4382216348
+2017-03-20 15:29:42,893 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents https://www.linkedin.com/ = 57.829149264
+2017-03-20 15:29:43,425 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Yahoo.com = 57.262713162
+2017-03-20 15:29:43,835 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Traffic.cn = 58.1063246138
+2017-03-20 15:29:44,347 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://www.cnn.com/ = 57.5855966197
+2017-03-20 15:29:44,771 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Youtube.com = 58.1953283373
+2017-03-20 15:29:45,204 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Digg.com = 58.9410597791
+2017-03-20 15:29:45,609 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents Amazonaws.com = 59.0852171433
+2017-03-20 15:29:46,124 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Feedburner.com = 56.9947412583
+2017-03-20 15:29:46,680 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Flickr.com = 57.4678508797
+2017-03-20 15:29:47,174 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Buydomains.com = 57.5121208024
+2017-03-20 15:29:47,592 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Statcounter.com = 58.5846349872
+2017-03-20 15:29:48,021 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Addthis.com = 58.4462322592
+2017-03-20 15:29:48,570 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://storm.helix.com/ = 57.4478390752
+2017-03-20 15:29:50,638 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vk.com = 49.881049629
+2017-03-20 15:29:51,089 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vimeo.com = 58.4511906021
+2017-03-20 15:29:51,487 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://elastic.helix.com = 294867.95265
+2017-03-20 15:29:52,030 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents https://www.linkedin.com/ = 57.1537045143
+2017-03-20 15:29:52,539 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Yahoo.com = 56.758492856
+2017-03-20 15:29:52,960 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Traffic.cn = 58.5643288269
+2017-03-20 15:29:53,466 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://www.cnn.com/ = 57.4674160595
+2017-03-20 15:29:53,898 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Youtube.com = 58.8759804782
+2017-03-20 15:29:54,323 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Digg.com = 58.5157696223
+2017-03-20 15:29:54,731 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents Amazonaws.com = 58.5179918307
+2017-03-20 15:29:55,238 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Feedburner.com = 56.9970747515
+2017-03-20 15:29:55,771 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Flickr.com = 56.6332269589
+2017-03-20 15:29:56,266 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Buydomains.com = 58.0031717873
+2017-03-20 15:29:56,268 - datagenerator.training.training_model - [INFO] - Extracting timestamp columns - username,timestamp
+2017-03-20 15:29:58,184 - datagenerator.training.training_model - [DEBUG] - writing json of source
+2017-03-20 15:29:58,185 - datagenerator.training.training_model - [DEBUG] - writing json of agent
+2017-03-20 15:29:58,185 - datagenerator.training.training_model - [DEBUG] - writing json of httpcode
+2017-03-20 15:29:58,185 - datagenerator.training.training_model - [DEBUG] - writing json of httpmethod
+2017-03-20 15:29:58,185 - datagenerator.training.training_model - [DEBUG] - writing json of url1
+2017-03-20 15:29:58,185 - datagenerator.training.training_model - [DEBUG] - writing json of url2
+2017-03-20 15:29:58,186 - datagenerator.training.training_model - [DEBUG] - writing json of sourceip
+2017-03-20 15:29:58,186 - datagenerator.training.training_model - [DEBUG] - writing json of port
+2017-03-20 15:29:58,186 - datagenerator.training.training_model - [DEBUG] - writing json of dest_ip
+2017-03-20 15:29:58,186 - datagenerator.training.training_model - [DEBUG] - writing json of bytesin
+2017-03-20 15:29:58,187 - datagenerator.training.training_model - [DEBUG] - writing json of bytesout
+2017-03-20 15:29:58,188 - datagenerator.training.training_model - [DEBUG] - writing json of username
+2017-03-20 15:29:58,189 - datagenerator.training.training_model - [DEBUG] - writing json of timestamp
+2017-03-20 15:29:58,190 - datagenerator.training.training_model - [INFO] - get_level:0.000133037567139
+2017-03-20 15:29:58,190 - datagenerator.training.training_model - [INFO] - get_timestamp_cols:1.81198120117e-05
+2017-03-20 15:29:58,190 - datagenerator.training.training_model - [INFO] - get_timestamp_nodes:1.91469407082
+2017-03-20 15:29:58,190 - datagenerator.training.training_model - [INFO] - get_varchar_cols:1.19209289551e-05
+2017-03-20 15:29:58,190 - datagenerator.training.training_model - [INFO] - get_varchar_nodes:36.8820309639
+2017-03-20 15:29:58,190 - datagenerator.training.training_model - [INFO] - get_model:0.00442004203796
+2017-03-20 15:29:58,190 - datagenerator.training.training_model - [INFO] - get_numeric_cols:1.50203704834e-05
+2017-03-20 15:29:58,190 - datagenerator.training.training_model - [INFO] - get_numeric_nodes:29.016285181
+2017-03-20 15:29:58,190 - datagenerator.training.training_model - [INFO] - get_header_dtypes:0.0309998989105
+2017-03-20 15:29:58,190 - datagenerator.training.training_model - [INFO] - Total time :67.8486082554
+2017-03-20 15:29:58,191 - datagenerator.training.training_model - [DEBUG] - Extracted levels for columns : username:1 httpmethod:3 timestamp:0 bytesout:3 agent:2 httpcode:3 source:2 url1:2 url2:3 bytesin:3 sourceip:3 port:2 dest_ip:3
+2017-03-20 15:29:58,191 - tests.training_tests - [DEBUG] - 
+
+Test get data with iris dataset
+=================
+
+2017-03-20 15:29:58,191 - datagenerator.training.training_model - [DEBUG] - Model trainer
+2017-03-20 15:29:58,191 - datagenerator.training.training_model - [INFO] - Extracting patterns from tests/in_data/irisdata.csv
+2017-03-20 15:29:58,201 - datagenerator.training.training_model - [DEBUG] - Extracted types for columns : sepal_width:float petal_width:float class:varchar sepal_length:float petal_length:float
+2017-03-20 15:29:58,202 - datagenerator.training.training_model - [DEBUG] - Extracted levels for columns : sepal_width:0 petal_width:0 class:0 sepal_length:0 petal_length:0
+2017-03-20 15:29:58,202 - datagenerator.training.training_model - [INFO] - Extracting varchar columns - class
+2017-03-20 15:29:58,218 - datagenerator.training.training_model - [INFO] - Extracting numeric columns - sepal_width,petal_width,sepal_length,petal_length
+2017-03-20 15:41:16,820 - tests.training_tests - [DEBUG] - Initialize
+2017-03-20 15:41:16,825 - datagenerator.models.types - [ERROR] - invalid type in ProbabilityDist
+2017-03-20 15:41:16,825 - datagenerator.models.types - [ERROR] - invalid value in ProbabilityDist
+2017-03-20 15:41:16,825 - tests.DataGenerator_tests - [INFO] - Testing datageneration with non-timestamp roots
+2017-03-20 15:41:19,116 - datagenerator.models.types - [DEBUG] - Non-timestamp root data generated
+2017-03-20 15:41:31,133 - tests.DataGenerator_tests - [INFO] - Testing datageneration with non-timestamp roots complete
+2017-03-20 15:41:31,144 - tests.training_tests - [DEBUG] - Setting up
+2017-03-20 15:41:31,144 - datagenerator.training.training_model - [DEBUG] - Model trainer
+2017-03-20 15:41:31,144 - datagenerator.training.training_model - [INFO] - Extracting patterns from tests/in_data/webdata_2users.csv
+2017-03-20 15:41:31,434 - datagenerator.training.training_model - [DEBUG] - Extracted types for columns : username:varchar bytesout:int timestamp:timestamp httpmethod:varchar agent:varchar httpcode:varchar source:varchar url1:varchar url2:varchar bytesin:int sourceip:varchar port:varchar dest_ip:varchar
+2017-03-20 15:41:31,434 - datagenerator.training.training_model - [DEBUG] - Extracted levels for columns : username:1 httpmethod:3 timestamp:0 bytesout:3 agent:2 httpcode:3 source:2 url1:2 url2:3 bytesin:3 sourceip:3 port:2 dest_ip:3
+2017-03-20 15:41:31,434 - datagenerator.training.training_model - [INFO] - Extracting varchar columns - httpmethod,agent,httpcode,source,url1,url2,sourceip,port,dest_ip
+2017-03-20 15:42:08,895 - datagenerator.training.training_model - [INFO] - Extracting numeric columns - bytesout,bytesin
+2017-03-20 15:42:20,018 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Statcounter.com = 58.0731884979
+2017-03-20 15:42:20,438 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Addthis.com = 58.2072918953
+2017-03-20 15:42:20,989 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://storm.helix.com/ = 57.5760264873
+2017-03-20 15:42:23,050 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vk.com = 50.1501830449
+2017-03-20 15:42:23,505 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vimeo.com = 58.4337976738
+2017-03-20 15:42:23,912 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://elastic.helix.com = 59.4382216348
+2017-03-20 15:42:24,462 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents https://www.linkedin.com/ = 57.829149264
+2017-03-20 15:42:24,968 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Yahoo.com = 57.262713162
+2017-03-20 15:42:25,394 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Traffic.cn = 58.1063246138
+2017-03-20 15:42:25,890 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://www.cnn.com/ = 57.5855966197
+2017-03-20 15:42:26,310 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Youtube.com = 58.1953283373
+2017-03-20 15:42:26,751 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Digg.com = 58.9410597791
+2017-03-20 15:42:27,152 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents Amazonaws.com = 59.0852171433
+2017-03-20 15:42:27,653 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Feedburner.com = 56.9947412583
+2017-03-20 15:42:28,196 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Flickr.com = 57.4678508797
+2017-03-20 15:42:28,680 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Buydomains.com = 57.5121208024
+2017-03-20 15:42:29,106 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Statcounter.com = 58.5846349872
+2017-03-20 15:42:29,524 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Addthis.com = 58.4462322592
+2017-03-20 15:42:30,067 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://storm.helix.com/ = 57.4478390752
+2017-03-20 15:42:32,102 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vk.com = 49.881049629
+2017-03-20 15:42:32,557 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vimeo.com = 58.4511906021
+2017-03-20 15:42:32,955 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://elastic.helix.com = 294867.95265
+2017-03-20 15:42:33,494 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents https://www.linkedin.com/ = 57.1537045143
+2017-03-20 15:42:34,002 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Yahoo.com = 56.758492856
+2017-03-20 15:42:34,423 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Traffic.cn = 58.5643288269
+2017-03-20 15:42:34,934 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://www.cnn.com/ = 57.4674160595
+2017-03-20 15:42:35,351 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Youtube.com = 58.8759804782
+2017-03-20 15:42:35,781 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Digg.com = 58.5157696223
+2017-03-20 15:42:36,192 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents Amazonaws.com = 58.5179918307
+2017-03-20 15:42:36,700 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Feedburner.com = 56.9970747515
+2017-03-20 15:42:37,245 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Flickr.com = 56.6332269589
+2017-03-20 15:42:37,749 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Buydomains.com = 58.0031717873
+2017-03-20 15:42:37,752 - datagenerator.training.training_model - [INFO] - Extracting timestamp columns - username,timestamp
+2017-03-20 15:42:39,688 - datagenerator.training.training_model - [DEBUG] - writing json of source
+2017-03-20 15:42:39,688 - datagenerator.training.training_model - [DEBUG] - writing json of agent
+2017-03-20 15:42:39,688 - datagenerator.training.training_model - [DEBUG] - writing json of httpcode
+2017-03-20 15:42:39,688 - datagenerator.training.training_model - [DEBUG] - writing json of httpmethod
+2017-03-20 15:42:39,689 - datagenerator.training.training_model - [DEBUG] - writing json of url1
+2017-03-20 15:42:39,689 - datagenerator.training.training_model - [DEBUG] - writing json of url2
+2017-03-20 15:42:39,689 - datagenerator.training.training_model - [DEBUG] - writing json of sourceip
+2017-03-20 15:42:39,689 - datagenerator.training.training_model - [DEBUG] - writing json of port
+2017-03-20 15:42:39,689 - datagenerator.training.training_model - [DEBUG] - writing json of dest_ip
+2017-03-20 15:42:39,690 - datagenerator.training.training_model - [DEBUG] - writing json of bytesin
+2017-03-20 15:42:39,691 - datagenerator.training.training_model - [DEBUG] - writing json of bytesout
+2017-03-20 15:42:39,692 - datagenerator.training.training_model - [DEBUG] - writing json of username
+2017-03-20 15:42:39,692 - datagenerator.training.training_model - [DEBUG] - writing json of timestamp
+2017-03-20 15:42:39,693 - datagenerator.training.training_model - [INFO] - get_level:0.000159025192261
+2017-03-20 15:42:39,693 - datagenerator.training.training_model - [INFO] - get_timestamp_cols:2.09808349609e-05
+2017-03-20 15:42:39,693 - datagenerator.training.training_model - [INFO] - get_timestamp_nodes:1.9354839325
+2017-03-20 15:42:39,693 - datagenerator.training.training_model - [INFO] - get_varchar_cols:1.38282775879e-05
+2017-03-20 15:42:39,693 - datagenerator.training.training_model - [INFO] - get_varchar_nodes:37.4578540325
+2017-03-20 15:42:39,693 - datagenerator.training.training_model - [INFO] - get_model:0.005038022995
+2017-03-20 15:42:39,693 - datagenerator.training.training_model - [INFO] - get_numeric_cols:1.71661376953e-05
+2017-03-20 15:42:39,693 - datagenerator.training.training_model - [INFO] - get_numeric_nodes:28.8541531563
+2017-03-20 15:42:39,693 - datagenerator.training.training_model - [INFO] - get_header_dtypes:0.0316281318665
+2017-03-20 15:42:39,693 - datagenerator.training.training_model - [INFO] - Total time :68.2843682766
+2017-03-20 15:42:39,694 - datagenerator.training.training_model - [DEBUG] - Extracted levels for columns : username:1 httpmethod:3 timestamp:0 bytesout:3 agent:2 httpcode:3 source:2 url1:2 url2:3 bytesin:3 sourceip:3 port:2 dest_ip:3
+2017-03-20 15:42:39,695 - tests.training_tests - [DEBUG] - 
+
+Test get data with iris dataset
+=================
+
+2017-03-20 15:42:39,695 - datagenerator.training.training_model - [DEBUG] - Model trainer
+2017-03-20 15:42:39,695 - datagenerator.training.training_model - [INFO] - Extracting patterns from tests/in_data/irisdata.csv
+2017-03-20 15:42:39,704 - datagenerator.training.training_model - [DEBUG] - Extracted types for columns : sepal_width:float petal_width:float class:varchar sepal_length:float petal_length:float
+2017-03-20 15:42:39,704 - datagenerator.training.training_model - [DEBUG] - Extracted levels for columns : sepal_width:0 petal_width:0 class:0 sepal_length:0 petal_length:0
+2017-03-20 15:42:39,705 - datagenerator.training.training_model - [INFO] - Extracting varchar columns - class
+2017-03-20 15:42:39,721 - datagenerator.training.training_model - [INFO] - Extracting numeric columns - sepal_width,petal_width,sepal_length,petal_length
+2017-03-20 15:43:26,783 - tests.training_tests - [DEBUG] - Initialize
+2017-03-20 15:43:26,787 - datagenerator.models.types - [ERROR] - invalid type in ProbabilityDist
+2017-03-20 15:43:26,787 - datagenerator.models.types - [ERROR] - invalid value in ProbabilityDist
+2017-03-20 15:43:26,788 - tests.DataGenerator_tests - [INFO] - Testing datageneration with non-timestamp roots
+2017-03-20 15:43:29,166 - datagenerator.models.types - [DEBUG] - Non-timestamp root data generated
+2017-03-20 15:43:41,085 - tests.DataGenerator_tests - [INFO] - Testing datageneration with non-timestamp roots complete
+2017-03-20 15:43:41,096 - tests.training_tests - [DEBUG] - Setting up
+2017-03-20 15:43:41,096 - datagenerator.training.training_model - [DEBUG] - Model trainer
+2017-03-20 15:43:41,096 - datagenerator.training.training_model - [INFO] - Extracting patterns from tests/in_data/webdata_2users.csv
+2017-03-20 15:43:41,389 - datagenerator.training.training_model - [DEBUG] - Extracted types for columns : username:varchar bytesout:int timestamp:timestamp httpmethod:varchar agent:varchar httpcode:varchar source:varchar url1:varchar url2:varchar bytesin:int sourceip:varchar port:varchar dest_ip:varchar
+2017-03-20 15:43:41,389 - datagenerator.training.training_model - [DEBUG] - Extracted levels for columns : username:1 httpmethod:3 timestamp:0 bytesout:3 agent:2 httpcode:3 source:2 url1:2 url2:3 bytesin:3 sourceip:3 port:2 dest_ip:3
+2017-03-20 15:43:41,389 - datagenerator.training.training_model - [INFO] - Extracting varchar columns - httpmethod,agent,httpcode,source,url1,url2,sourceip,port,dest_ip
+2017-03-20 15:44:17,747 - datagenerator.training.training_model - [INFO] - Extracting numeric columns - bytesout,bytesin
+2017-03-20 15:44:28,746 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Statcounter.com = 58.0731884979
+2017-03-20 15:44:29,137 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Addthis.com = 58.2072918953
+2017-03-20 15:44:29,660 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://storm.helix.com/ = 57.5760264873
+2017-03-20 15:44:31,725 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vk.com = 50.1501830449
+2017-03-20 15:44:32,192 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vimeo.com = 58.4337976738
+2017-03-20 15:44:32,601 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://elastic.helix.com = 59.4382216348
+2017-03-20 15:44:33,141 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents https://www.linkedin.com/ = 57.829149264
+2017-03-20 15:44:33,643 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Yahoo.com = 57.262713162
+2017-03-20 15:44:34,055 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Traffic.cn = 58.1063246138
+2017-03-20 15:44:34,558 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://www.cnn.com/ = 57.5855966197
+2017-03-20 15:44:34,970 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Youtube.com = 58.1953283373
+2017-03-20 15:44:35,402 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Digg.com = 58.9410597791
+2017-03-20 15:44:35,805 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents Amazonaws.com = 59.0852171433
+2017-03-20 15:44:36,321 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Feedburner.com = 56.9947412583
+2017-03-20 15:44:36,868 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Flickr.com = 57.4678508797
+2017-03-20 15:44:37,342 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Buydomains.com = 57.5121208024
+2017-03-20 15:44:37,741 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Statcounter.com = 58.5846349872
+2017-03-20 15:44:38,139 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Addthis.com = 58.4462322592
+2017-03-20 15:44:38,673 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://storm.helix.com/ = 57.4478390752
+2017-03-20 15:44:40,725 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vk.com = 49.881049629
+2017-03-20 15:44:41,200 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Vimeo.com = 58.4511906021
+2017-03-20 15:44:41,609 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://elastic.helix.com = 294867.95265
+2017-03-20 15:44:42,138 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents https://www.linkedin.com/ = 57.1537045143
+2017-03-20 15:44:42,650 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Yahoo.com = 56.758492856
+2017-03-20 15:44:43,053 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Traffic.cn = 58.5643288269
+2017-03-20 15:44:43,557 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://www.cnn.com/ = 57.4674160595
+2017-03-20 15:44:43,969 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Youtube.com = 58.8759804782
+2017-03-20 15:44:44,379 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Digg.com = 58.5157696223
+2017-03-20 15:44:44,795 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents Amazonaws.com = 58.5179918307
+2017-03-20 15:44:45,301 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Feedburner.com = 56.9970747515
+2017-03-20 15:44:45,849 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Flickr.com = 56.6332269589
+2017-03-20 15:44:46,352 - datagenerator.training.training_model - [DEBUG] - bandwidth for parents http://Buydomains.com = 58.0031717873
+2017-03-20 15:44:46,354 - datagenerator.training.training_model - [INFO] - Extracting timestamp columns - username,timestamp
+2017-03-20 15:44:48,289 - datagenerator.training.training_model - [DEBUG] - writing json of source
+2017-03-20 15:44:48,289 - datagenerator.training.training_model - [DEBUG] - writing json of agent
+2017-03-20 15:44:48,289 - datagenerator.training.training_model - [DEBUG] - writing json of httpcode
+2017-03-20 15:44:48,289 - datagenerator.training.training_model - [DEBUG] - writing json of httpmethod
+2017-03-20 15:44:48,289 - datagenerator.training.training_model - [DEBUG] - writing json of url1
+2017-03-20 15:44:48,289 - datagenerator.training.training_model - [DEBUG] - writing json of url2
+2017-03-20 15:44:48,289 - datagenerator.training.training_model - [DEBUG] - writing json of sourceip
+2017-03-20 15:44:48,290 - datagenerator.training.training_model - [DEBUG] - writing json of port
+2017-03-20 15:44:48,290 - datagenerator.training.training_model - [DEBUG] - writing json of dest_ip
+2017-03-20 15:44:48,290 - datagenerator.training.training_model - [DEBUG] - writing json of bytesin
+2017-03-20 15:44:48,291 - datagenerator.training.training_model - [DEBUG] - writing json of bytesout
+2017-03-20 15:44:48,292 - datagenerator.training.training_model - [DEBUG] - writing json of username
+2017-03-20 15:44:48,292 - datagenerator.training.training_model - [DEBUG] - writing json of timestamp
+2017-03-20 15:44:48,293 - datagenerator.training.training_model - [INFO] - get_level:0.000305891036987
+2017-03-20 15:44:48,293 - datagenerator.training.training_model - [INFO] - get_timestamp_cols:1.69277191162e-05
+2017-03-20 15:44:48,293 - datagenerator.training.training_model - [INFO] - get_timestamp_nodes:1.93434810638
+2017-03-20 15:44:48,293 - datagenerator.training.training_model - [INFO] - get_varchar_cols:1.78813934326e-05
+2017-03-20 15:44:48,293 - datagenerator.training.training_model - [INFO] - get_varchar_nodes:36.3552119732
+2017-03-20 15:44:48,293 - datagenerator.training.training_model - [INFO] - get_model:0.00393486022949
+2017-03-20 15:44:48,293 - datagenerator.training.training_model - [INFO] - get_numeric_cols:1.31130218506e-05
+2017-03-20 15:44:48,293 - datagenerator.training.training_model - [INFO] - get_numeric_nodes:28.6052892208
+2017-03-20 15:44:48,293 - datagenerator.training.training_model - [INFO] - get_header_dtypes:0.0228590965271
+2017-03-20 15:44:48,293 - datagenerator.training.training_model - [INFO] - Total time :66.9219970703
+2017-03-20 15:44:48,293 - datagenerator.training.training_model - [DEBUG] - Extracted levels for columns : username:1 httpmethod:3 timestamp:0 bytesout:3 agent:2 httpcode:3 source:2 url1:2 url2:3 bytesin:3 sourceip:3 port:2 dest_ip:3
+2017-03-20 15:44:48,294 - tests.training_tests - [DEBUG] - 
+
+Test get data with iris dataset
+=================
+
+2017-03-20 15:44:48,294 - datagenerator.training.training_model - [DEBUG] - Model trainer
+2017-03-20 15:44:48,294 - datagenerator.training.training_model - [INFO] - Extracting patterns from tests/in_data/irisdata.csv
+2017-03-20 15:44:48,304 - datagenerator.training.training_model - [DEBUG] - Extracted types for columns : sepal_width:float petal_width:float class:varchar sepal_length:float petal_length:float
+2017-03-20 15:44:48,304 - datagenerator.training.training_model - [DEBUG] - Extracted levels for columns : sepal_width:0 petal_width:0 class:0 sepal_length:0 petal_length:0
+2017-03-20 15:44:48,304 - datagenerator.training.training_model - [INFO] - Extracting varchar columns - class
+2017-03-20 15:44:48,324 - datagenerator.training.training_model - [INFO] - Extracting numeric columns - sepal_width,petal_width,sepal_length,petal_length
+2017-03-20 15:44:48,339 - datagenerator.training.training_model - [DEBUG] - bandwidth forsepal_width = 0.168035319442
+2017-03-20 15:44:48,340 - datagenerator.training.training_model - [DEBUG] - bandwidth forpetal_width = 0.295755630683
+2017-03-20 15:44:48,342 - datagenerator.training.training_model - [DEBUG] - bandwidth forsepal_length = 0.320909091028
+2017-03-20 15:44:48,343 - datagenerator.training.training_model - [DEBUG] - bandwidth forpetal_length = 0.68378422209
+2017-03-20 15:44:48,344 - datagenerator.training.training_model - [DEBUG] - writing json of class
+2017-03-20 15:44:48,344 - datagenerator.training.training_model - [DEBUG] - writing json of sepal_width
+2017-03-20 15:44:48,344 - datagenerator.training.training_model - [DEBUG] - writing json of petal_width
+2017-03-20 15:44:48,344 - datagenerator.training.training_model - [DEBUG] - writing json of sepal_length
+2017-03-20 15:44:48,344 - datagenerator.training.training_model - [DEBUG] - writing json of petal_length
+2017-03-20 15:44:48,344 - datagenerator.training.training_model - [INFO] - get_level:6.98566436768e-05
+2017-03-20 15:44:48,344 - datagenerator.training.training_model - [INFO] - get_timestamp_cols:4.05311584473e-06
+2017-03-20 15:44:48,344 - datagenerator.training.training_model - [INFO] - get_timestamp_nodes:0
+2017-03-20 15:44:48,345 - datagenerator.training.training_model - [INFO] - get_varchar_cols:1.90734863281e-06
+2017-03-20 15:44:48,345 - datagenerator.training.training_model - [INFO] - get_varchar_nodes:0.0196931362152
+2017-03-20 15:44:48,345 - datagenerator.training.training_model - [INFO] - get_model:0.000210046768188
+2017-03-20 15:44:48,345 - datagenerator.training.training_model - [INFO] - get_numeric_cols:5.96046447754e-06
+2017-03-20 15:44:48,345 - datagenerator.training.training_model - [INFO] - get_numeric_nodes:0.0195848941803
+2017-03-20 15:44:48,345 - datagenerator.training.training_model - [INFO] - get_header_dtypes:0.00840592384338
+2017-03-20 15:44:48,345 - datagenerator.training.training_model - [INFO] - Total time :0.0479757785797
+2017-03-20 15:44:48,381 - datagenerator.models.types - [DEBUG] - Non-timestamp root data generated

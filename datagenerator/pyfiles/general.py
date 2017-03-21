@@ -18,7 +18,7 @@ def kernel_density_estimate(value_list,points=None):
         return 0,{sum(value_list)/no_of_values: 1}
     # Generate bins
     if points is None:
-        bin_values = [int(v/bandwidth)*bandwidth + float(bandwidth)/2  for v in value_list]
+        bin_values = [int(v/bandwidth)*bandwidth for v in value_list]
     else:
         bin_values = points
     # Get density for each bins
