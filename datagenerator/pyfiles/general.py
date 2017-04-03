@@ -69,6 +69,10 @@ def bin_frequencies(value_list,points=None):
     """ Returns KDE values and bandwidth for given list of numbers """
     # Find bandwidth
     # Use Silverman's rule of thumb to get bandwidth
+    densities = {}
+    if(len(value_list)==1):
+        densities[value_list[0]]=1
+        return 0, densities
     no_of_values = len(value_list)
     std_dev = np.std(value_list)
     iqr = get_quartile_range(value_list) # Interquartile range
@@ -82,7 +86,6 @@ def bin_frequencies(value_list,points=None):
     else:
         bin_values = points
     # Get density for each bins
-    densities = {}
     number_of_ele = len(bin_values)
     for _bin in bin_values:
         densities[_bin] = float(bin_values.count(_bin))/number_of_ele

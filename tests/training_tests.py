@@ -19,22 +19,19 @@ class TestTraining(object):
     @classmethod
     def setupClass(self):
         logger.debug("Setting up")
-        filename = "tests/in_data/webdata_2users.csv"
+        filename = "tests/in_data/new_web_2users.csv"
         # filename = "tests/in_data/webdata.csv"
-        overrides = {"port":"varchar", "httpcode":"varchar"}
+        overrides = {"port":"varchar", "httpResponse":"varchar"}
         dependencies = {"username":["timestamp"],
                         "timestamp":[],
                         "agent":["username"],
-                        "source":["username"],
-                        "sourceip":["source"],
-                        "url1":["username"],
-                        "url2":["url1"],
-                        "dest_ip":["url1"],
-                        "port":["username"],
-                        "bytesin":["url1"],
-                        "bytesout":["url1"],
-                        "httpcode":["username","url1"],
-                        "httpmethod":["username","url1"]}
+                        "sourceip":["username"],
+                        "destination":["username"],
+                        "destinationpIP":["destination"],
+                        "bytes_in":["destination"],
+                        "bytes_out":["destination"],
+                        "httpResponse":["username","destination"],
+                        "method":["username","destination"]}
         self.training_data = ModelTrainer(filename=filename,
                                     header="True",
                                     dependencies=dependencies,
@@ -48,34 +45,31 @@ class TestTraining(object):
         assert_equal(self.training_data.header,{"username":"varchar",
                                            "timestamp":"timestamp",
                                            "agent":"varchar",
-                                           "source":"varchar",
                                            "sourceip":"varchar",
-                                           "url1":"varchar",
-                                           "url2":"varchar",
-                                           "dest_ip":"varchar",
-                                           "port":"varchar",
-                                           "bytesin":"int",
-                                           "bytesout":"int",
-                                           "httpcode":"varchar",
-                                           "httpmethod":"varchar"})
+                                           "destination":"varchar",                                           
+                                           "destinationpIP":"varchar",
+                                           "bytes_in":"int",
+                                           "bytes_out":"int",
+                                           "httpResponse":"varchar",
+                                           "method":"varchar"})
 
 
 
-    # def test_get_model(self):
-    #     """ Test get_model function """
-    #     logger.debug("Test get_model function")
-    #     logger.debug("Finished extracting Proxy data.... Generating")
-    #     tree_data_proxy = Tree(self.training_data.model, self.training_data.header.keys())
-    #     records = tree_data_proxy.generate_data(_start=datetime.datetime.strptime("2016-04-01 00:00", "%Y-%m-%d %H:%M"),
-    #                             _end=datetime.datetime.strptime("2016-05-30 00:00", "%Y-%m-%d %H:%M"),filename="data.csv")
-    #     logger.debug("Finished generating data....")
-    #     assert_equal(len(records)>1, True)
+    def test_get_model(self):
+        """ Test get_model function """
+        logger.debug("Test get_model function")
+        logger.debug("Finished extracting Proxy data.... Generating")
+        tree_data_proxy = Tree(self.training_data.model, self.training_data.header.keys())
+        records = tree_data_proxy.generate_data(_start=datetime.datetime.strptime("2016-04-01 00:00", "%Y-%m-%d %H:%M"),
+                                _end=datetime.datetime.strptime("2016-04-20 00:00", "%Y-%m-%d %H:%M"),filename="new_web_2users_syn.csv")
+        logger.debug("Finished generating data....")
+        assert_equal(len(records)>1, True)
 
     def test_get_varchar_cols(self):
         """ Test get_varchar_cols function """
         returned_data = (self.training_data.get_varchar_cols())
-        expected_data = ["username","agent","source","sourceip","url1","url2",
-        "dest_ip","port","httpcode","httpmethod"]
+        expected_data = ["username","agent","sourceip",
+        "destination","destinationpIP","httpResponse","method"]
         returned_data.sort()
         expected_data.sort()
         assert_equal(returned_data,expected_data)
@@ -83,7 +77,7 @@ class TestTraining(object):
     def test_get_numeric_cols(self):
         """ Test get_numeric_cols function """
         returned_data = (self.training_data.get_numeric_cols())
-        expected_data = ["bytesin","bytesout"]
+        expected_data = ["bytes_in","bytes_out"]
         returned_data.sort()
         expected_data.sort()
         assert_equal(returned_data,expected_data)
@@ -99,9 +93,9 @@ class TestTraining(object):
     def test_get_levels(self):
         """ Test get_varchar_cols function """
         returned_levels = self.training_data.get_level()
-        expected_levels = {"username":1, "timestamp":0, "agent":2, "source":2,
-                           "sourceip":3, "url1":2, "url2":3, "dest_ip":3, "port":2,
-                           "bytesin":3, "bytesout":3, "httpcode":3, "httpmethod":3}
+        expected_levels = {"username":1, "timestamp":0, "agent":2,
+                           "sourceip":2, "destination":2, "destinationpIP":3,
+                           "bytes_in":3, "bytes_out":3, "httpResponse":3, "method":3}
         assert_equal(returned_levels,expected_levels)
 
     # def test_repo_data(self):
@@ -132,18 +126,18 @@ class TestTraining(object):
     #     logger.debug("Test get data with non-timestamp root function")
     #     filename = "tests/in_data/web_no_timestamp.csv"
     #     # filename = "tests/in_data/webdata.csv"
-    #     overrides = {"port":"varchar", "httpcode":"varchar"}
+    #     overrides = {"port":"varchar", "httpResponse":"varchar"}
     #     dependencies = {"username":[],
     #             "agent":["username"],
     #             "source":["username"],
     #             "sourceip":["source"],
     #             "url1":["username"],
     #             "url2":["url1"],
-    #             "dest_ip":["url1"],
+    #             "destinationpIP":["url1"],
     #             "port":["username"],
-    #             "bytesin":["url1"],
-    #             "bytesout":["url1"],
-    #             "httpcode":["username","url1"],
+    #             "bytes_in":["url1"],
+    #             "bytes_out":["url1"],
+    #             "httpResponse":["username","url1"],
     #             "httpmethod":["username","url1"]}
     #     training_data = ModelTrainer(filename=filename,
     #                                         header="True",
@@ -154,17 +148,17 @@ class TestTraining(object):
     #     tree_data_nots = Tree(training_data.model, training_data.header.keys())
     #     rnots_records = tree_data_nots.generate_data(counts=10000,filename="nots_webdata.csv")
     #     assert_equal(len(rnots_records)>1, True)
-    #
+    # #
     def test_iris_data(self):
         logger.debug("\n\nTest get data with iris dataset\n=================\n")
         filename = "tests/in_data/irisdata.csv"
         # filename = "tests/in_data/webdata.csv"
         overrides = {}
         dependencies = {"class":[],
-                "sepal_length":[],
-                "sepal_width":[],
-                "petal_length":[],
-                "petal_width":[]}
+                "sepal_length":["class"],
+                "sepal_width":["class"],
+                "petal_length":["class"],
+                "petal_width":["class"]}
         training_data = ModelTrainer(filename=filename,
                                             header="True",
                                             dependencies=dependencies,
@@ -202,3 +196,27 @@ class TestTraining(object):
     #                             _end=datetime.datetime.strptime("21/12/06 00:00", "%d/%m/%y %H:%M"),filename="ADdata.csv")
     #     logger.debug("Finished Generating AD data")
     #     assert_equal(len(records)>1, True)
+    def test_real_proxy_data(self):
+        logger.debug("\n\nTest real webproxy dataset\n=================\n")
+        filename = "tests/in_data/realProxy_filtered_100K.csv"
+        # filename = "tests/in_data/webdata.csv"
+        overrides = {"port":"varchar", "httpResponseStatus":"varchar"}
+        dependencies = {"clientIp":["timestamp"],
+                        "timestamp":[],
+                        "timeSpent":["clientIp","destHostName"],
+                        "destHostName":["clientIp"],
+                        "payloadSizeResponse":["destHostName"],
+                        "httpMethod":["destHostName","clientIp"],
+                        "httpResponseStatus":["destHostName","httpMethod","clientIp"]}
+        training_data = ModelTrainer(filename=filename,
+                                            header="True",
+                                            timestamp_cols=['timestamp'],
+                                            timestamp_format='%Y-%m-%dT%H:%M:%S',
+                                            dependencies=dependencies,
+                                            overrides = overrides,delimitter="\t")
+        training_data.print_time_taken()
+
+        tree_data_nots = Tree(training_data.model, training_data.header.keys())
+        rnots_records = tree_data_nots.generate_data(_start=datetime.datetime.strptime("2016-04-01 00:00", "%Y-%m-%d %H:%M"),
+                                _end=datetime.datetime.strptime("2016-04-20 00:00", "%Y-%m-%d %H:%M"),filename="realdata_syn.csv")
+        assert_equal(len(rnots_records)>1, True)

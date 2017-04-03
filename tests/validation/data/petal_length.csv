@@ -1,0 +1,4 @@
+col,class,bandwidth
+petal_length,Iris-virginica,0.264644580234
+petal_length,Iris-setosa,0.0832020824185
+petal_length,Iris-versicolor,0.225331742262

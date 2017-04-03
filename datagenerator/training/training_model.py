@@ -16,7 +16,7 @@ class ModelTrainer(object):
     """ encapsulates the data and methods required to extract pattern from data"""
 
     def __init__(self, filename, header, dependencies, timestamp_cols=[],
-                 timestamp_format=None, overrides=None, logger=None):
+                 timestamp_format=None, overrides=None, logger=None,delimitter=","):
         self.logger = logging.getLogger(__name__)
         self.logger.debug("Model trainer")
         self.logger.info("Extracting patterns from "+filename)
@@ -24,9 +24,9 @@ class ModelTrainer(object):
 
 
         if header == "True":
-            self.data = pd.DataFrame(pd.read_csv(filename, header=0))
+            self.data = pd.DataFrame(pd.read_csv(filename, header=0,sep=delimitter))
         else:
-            self.data = pd.read_csv(filename, header=None)
+            self.data = pd.read_csv(filename, header=None,sep=delimitter)
         # TODO: handle columns with NaN
         self.data.fillna(0)
 
@@ -121,7 +121,7 @@ class ModelTrainer(object):
             i += 1
             iter_no += 1
             if iter_no == max_iter:
-                self.logger.info("Infinite loop in determining levels")
+                self.logger.error("Infinite loop in determining levels")
                 self.time_taken["get_level"] = (time.time() - START_TIME)
                 return {}
         self.logger.debug("Extracted levels for columns : " +
@@ -298,7 +298,7 @@ class ModelTrainer(object):
                     # bandwidth, kde_vals = kernel_density_estimate(distinctparentsdata[col][parentskey])
                     bandwidth, kde_vals = bin_frequencies(distinctparentsdata[col][parentskey])
 
-                    self.logger.debug("bandwidth for parents "+parentskey+" = "+str(bandwidth))
+                    self.logger.debug("bandwidth for (col,parents) " + col + ","+parentskey+" = "+str(bandwidth))
                     # Remove bins with 0 probability in kde_vals
                     # for bin_val in kde_vals.keys():
                     #     if kde_vals[bin_val] < (0.000000000001):
@@ -391,16 +391,20 @@ class ModelTrainer(object):
                     sub_data_hour[0] = pd.to_datetime(sub_data_hour[0])
                     sub_data_weekhour = sub_data_hour[0].apply(lambda ts: ts.weekday()*24*60 + ts.hour*60)
                     weekhour_counts = sub_data_weekhour.value_counts().to_dict()
-                    weekday_counts = {0:10,1:10,2:10,3:10,4:10,5:10,6:10}
+                    #weekday_counts = {0:10,1:10,2:10,3:10,4:10,5:10,6:10}
                     kde_hour = extract_weekminute_probs(weekhour_counts, weekday_counts)
 
                     #Extract events per time bucket
                     sub_data["DateHour"] = sub_data[root_node].apply(lambda dt: datetime.datetime(dt.year,dt.month,dt.day,dt.hour,0))
                     sub_data["WeekHour"] = sub_data[root_node].apply(lambda ts: ts.weekday()*24*60 +
                                                                                 ts.hour*60)
-                    grouped = sub_data.groupby(['DateHour','WeekHour'],as_index=False)
-                    eventsPH = (((grouped.size().to_frame()).groupby(level=1)).mean())[0].to_dict()
-
+                    # grouped = sub_data.groupby(['DateHour','WeekHour'],as_index=False)
+                    # eventsPH = (((grouped.size().to_frame()).groupby(level=1)).mean())[0].to_dict()
+                    grouped_dh = (grouped.size().to_frame()).groupby(level=1)
+                    eventsPH_list = {k: list(v) for k,v in grouped_dh[0]}
+                    eventsPH = {}
+                    for date_hour in eventsPH_list.keys():
+                        bw,eventsPH[date_hour] = bin_frequencies(eventsPH_list[date_hour])
 
                 if node_data[root_node].time_probs.has_key(child):
                     node_data[root_node].time_probs[child][child_value] = kde_hour

@@ -1,0 +1,321 @@
+---
+title: "Validate synthetic data"
+author: "Asad Narayanan"
+date: "April 1, 2017"
+output:
+  pdf_document:
+    fig_height: 6
+    fig_width: 10
+    number_sections: yes
+    toc: yes
+  html_document:
+    number_sections: yes
+    toc: yes
+header-includes:
+- \usepackage{float}
+---
+\newpage
+
+In this document, same analysis that is performed for Bayers on `Clustering_BAY_V4` is performed on surescript data. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(dplyr)
+library(ggplot2)
+library(grid)
+library(gridExtra)
+library(knitr)
+library(lubridate)
+```
+# Web proxy data
+##Initialization 
+```{r echo=TRUE}
+#Extracting features
+#load data from csv
+setwd("~/Documents/thesis/DataGenerator/Synthetic-Data-Generator/tests/validation/")
+
+#Initialize original data
+data_orig <- fread("../in_data/small_sample_webproxy_new.csv")
+
+data_orig <- data_orig %>% mutate(
+  Time = parse_date_time(substr(unlist(data_orig$timestamp),0,19), "ymd hms"),
+  Week_day = wday(Time),
+  Hour = hour(Time),
+  eDate = floor_date(Time, "day"),
+  WeekHour = (Week_day-1)*24+Hour)
+
+#Initialize synthetic data
+data_syn <- fread("../out_data/small_webproxy_syn.csv")
+data_syn <- data_syn %>% mutate(
+  Time = parse_date_time(substr(unlist(data_syn$timestamp),0,19), "ymd hms"),
+  Week_day = wday(Time),
+  Hour = hour(Time),
+  eDate = floor_date(Time, "day"),
+  WeekHour = (Week_day-1)*24+Hour)
+
+bytes_in_data <- read.csv("../validation/data/bytes_in_100K.csv")
+bytes_out_data <- read.csv("../validation/data/bytes_out_100K.csv")
+
+data_orig$bin_bw = bytes_in_data$bandwidth[match(data_orig$destination,bytes_in_data$dest)] 
+data_orig$bout_bw = bytes_out_data$bandwidth[match(data_orig$destination,bytes_out_data$dest)] 
+
+data_syn$bin_bw = bytes_in_data$bandwidth[match(data_syn$destination,bytes_in_data$dest)] 
+data_syn$bout_bw = bytes_out_data$bandwidth[match(data_syn$destination,bytes_out_data$dest)] 
+
+data_orig <- data_orig %>% mutate( bytes_in= as.integer(bytes_in/bin_bw)*bin_bw,
+                                  bytes_out = as.integer(bytes_out/bout_bw)*bout_bw)
+
+data_syn <- data_syn %>% mutate( bytes_in= as.integer(bytes_in/bin_bw)*bin_bw,
+                                  bytes_out = as.integer(bytes_out/bout_bw)*bout_bw)
+
+#Initializa dependencies
+dependencies = list(c("username", "WeekHour"),
+        c("agent", "username"),
+        c("sourceip", "username"),
+        c("destination", "username"),
+        c("destinationpIP", "destination"),
+        c("bytes_in", "destination"),
+        c("bytes_out", "destination"),
+        c("httpResponse", "username","destination"),
+        c("method", "username","destination"))
+
+```
+
+##Distribution of Original data vs Synthetic data
+```{r echo=FALSE}
+pvalues <- c()
+dep_list <- unlist(lapply(dependencies, function(d) { paste(unlist(d),collapse = ",")}))
+for(i in c(1:length(dependencies)))
+{
+  grouped_orig <- data_orig %>% group_by_(.dots=lapply(unlist(dependencies[i]), as.symbol)) %>% summarise(count_orig = n())
+
+  grouped_syn <- data_syn %>% group_by_(.dots=lapply(unlist(dependencies[i]), as.symbol)) %>% summarise(count_syn = n())
+  
+  #for(col in unlist(dependencies[i])){
+  #  print(col)
+  #  grouped_orig[col] <- as.character(grouped_orig[[col]])
+  #  grouped_syn[col] <-  as.character(grouped_syn[[col]])
+  #}
+  
+  group_joined <- grouped_orig %>% inner_join(grouped_syn) %>% arrange(count_orig)
+  
+  group_joined$parentHash <- do.call(paste,c(group_joined[unlist(dependencies[i])],sep=""))
+  
+  size_of_syn <- sum(grouped_syn$count_syn)
+  size_of_orig <- sum(grouped_orig$count_orig)
+  group_joined <- group_joined %>% mutate(expected_count = (count_orig/size_of_orig)*size_of_syn)
+    
+  if((nrow(group_joined)<10000) && (nrow(group_joined)>2)){
+      plot <-  ggplot(group_joined) + geom_line(aes(x=parentHash,y=expected_count,group=1),col="red", alpha=0.5,size=0.3) + 
+                         geom_line(aes(x=parentHash,y=count_syn,group=1),col="blue",alpha = 0.5,size=0.1) + 
+                         ggtitle(paste("Distribution of frequencies of values in columns ",
+                                       paste(unlist(dependencies[i]),collapse = ",")))+
+                         theme(axis.text.x = element_blank(),axis.ticks.x = element_blank())
+
+
+    print(plot)
+  }  
+  a <- chisq.test(group_joined[,c("expected_count","count_syn")])
+
+  pvalues[i] <- a$p.value
+  print(paste("P-value of ",paste(unlist(dependencies[i]),collapse = ","),"is",a$p.value))
+}
+
+p_value_data <- data.frame(dependency_vals = dep_list, p_value = pvalues)
+kable(p_value_data,caption = "P-values of original and synthetic data")
+```
+
+#Iris Data
+##Initialization 
+```{r echo=TRUE}
+#Extracting features
+#load data from csv
+setwd("~/Documents/thesis/DataGenerator/Synthetic-Data-Generator/tests/validation/")
+
+#Initialize original data
+
+data_orig <- fread("../in_data/irisdata.csv")
+data_syn <- fread("../out_data/irisdata_syn.csv")
+
+sepel_length_data <- read.csv("../validation/data/sepal_length.csv")
+petel_length_data <- read.csv("../validation/data/petal_length.csv")
+sepel_width_data <- read.csv("../validation/data/sepal_width.csv")
+petel_width_data <- read.csv("../validation/data/petal_width.csv")
+
+data_orig$sl_bw = sepel_length_data$bandwidth[match(data_orig$class,sepel_length_data$class)] 
+data_orig$pl_bw = petel_length_data$bandwidth[match(data_orig$class,petel_length_data$class)] 
+data_orig$sw_bw = sepel_width_data$bandwidth[match(data_orig$class,sepel_width_data$class)] 
+data_orig$pw_bw = petel_width_data$bandwidth[match(data_orig$class,petel_length_data$class)] 
+
+data_syn$sl_bw = sepel_length_data$bandwidth[match(data_syn$class,sepel_length_data$class)] 
+data_syn$pl_bw = petel_length_data$bandwidth[match(data_syn$class,petel_length_data$class)] 
+data_syn$sw_bw = sepel_width_data$bandwidth[match(data_syn$class,sepel_width_data$class)] 
+data_syn$pw_bw = petel_width_data$bandwidth[match(data_syn$class,petel_length_data$class)] 
+
+data_orig <- data_orig %>% mutate(sepal_width = as.integer(sepal_width/sw_bw)*sw_bw,
+                                  petal_width = as.integer(petal_width/pw_bw)*pw_bw,
+                                  sepal_length = as.integer(sepal_length/sl_bw)*sl_bw,
+                                  petal_length = as.integer(petal_length/pl_bw)*pl_bw)
+
+data_syn <- data_syn %>% mutate(sepal_width = as.integer(sepal_width/sw_bw)*sw_bw,
+                                  petal_width = as.integer(petal_width/pw_bw)*pw_bw,
+                                  sepal_length = as.integer(sepal_length/sl_bw)*sl_bw,
+                                  petal_length = as.integer(petal_length/pl_bw)*pl_bw)
+
+dependencies = list(c("class"),
+                c("sepal_length","class"),
+                c("sepal_width","class"),
+                c("petal_length","class"),
+                c("petal_width","class"))
+```
+
+##Distribution of Original data vs Synthetic data
+```{r echo=FALSE}
+pvalues <- c()
+dep_list <- unlist(lapply(dependencies, function(d) { paste(unlist(d),collapse = ",")}))
+for(i in c(1:length(dependencies)))
+{
+  grouped_orig <- data_orig %>% group_by_(.dots=lapply(unlist(dependencies[i]), as.symbol)) %>% summarise(count_orig = n())
+
+  grouped_syn <- data_syn %>% group_by_(.dots=lapply(unlist(dependencies[i]), as.symbol)) %>% summarise(count_syn = n())
+  
+  #for(col in unlist(dependencies[i])){
+  #  print(col)
+  #  grouped_orig[col] <- as.character(grouped_orig[[col]])
+  #  grouped_syn[col] <-  as.character(grouped_syn[[col]])
+  #}
+  
+  group_joined <- grouped_orig %>% inner_join(grouped_syn) %>% arrange(count_orig)
+  
+  group_joined$parentHash <- do.call(paste,c(group_joined[unlist(dependencies[i])],sep=""))
+  
+  size_of_syn <- sum(grouped_syn$count_syn)
+  size_of_orig <- sum(grouped_orig$count_orig)
+  group_joined <- group_joined %>% mutate(expected_count = (count_orig/size_of_orig)*size_of_syn)
+    
+  if((nrow(group_joined)<10000) && (nrow(group_joined)>2)){
+      plot <-  ggplot(group_joined) + geom_line(aes(x=parentHash,y=expected_count,group=1),col="red", alpha=0.5,size=0.3) + 
+                         geom_line(aes(x=parentHash,y=count_syn,group=1),col="blue",alpha = 0.5,size=0.1) + 
+                         ggtitle(paste("Distribution of frequencies of values in columns ",
+                                       paste(unlist(dependencies[i]),collapse = ",")))+
+                         theme(axis.text.x = element_blank(),axis.ticks.x = element_blank())
+
+
+    print(plot)
+  }  
+  a <- chisq.test(group_joined[,c("expected_count","count_syn")])
+
+  pvalues[i] <- a$p.value
+  print(paste("P-value of ",paste(unlist(dependencies[i]),collapse = ","),"is",a$p.value))
+}
+
+p_value_data <- data.frame(dependency_vals = dep_list, p_value = pvalues)
+kable(p_value_data,caption = "P-values of original and synthetic data")
+```
+
+#Real Webproxy Data
+##Initialization 
+```{r echo=TRUE}
+#Extracting features
+#load data from csv
+setwd("~/Documents/thesis/DataGenerator/Synthetic-Data-Generator/tests/validation/")
+
+#Initialize original data
+data_orig <- fread("../in_data/realProxy_filtered_100K.csv")
+
+data_orig <- data_orig %>% mutate(
+  Time = parse_date_time(substr(unlist(data_orig$timestamp),0,19), "ymd hms"),
+  Week_day = wday(Time),
+  Hour = hour(Time),
+  eDate = floor_date(Time, "day"),
+  WeekHour = (Week_day-1)*24+Hour)
+
+#Initialize synthetic data
+data_syn <- fread("../out_data/realdata_syn.csv")
+data_syn <- data_syn %>% mutate(
+  Time = parse_date_time(substr(unlist(data_syn$timestamp),0,19), "ymd hms"),
+  Week_day = wday(Time),
+  Hour = hour(Time),
+  eDate = floor_date(Time, "day"),
+  WeekHour = (Week_day-1)*24+Hour)
+
+timespent_data <- read.csv("../validation/data/timespent.csv")
+payload_data <- read.csv("../validation/data/payload.csv")
+
+data_orig <- data_orig %>% inner_join(timespent_data%>%select(clientIp,destHostName,ts_bandwidth))
+data_orig <- data_orig %>% inner_join(payload_data%>%select(destHostName,pay_bandwidth))
+
+data_syn <- data_syn %>% inner_join(timespent_data%>%select(clientIp,destHostName,ts_bandwidth))
+data_syn <- data_syn %>% inner_join(payload_data%>%select(destHostName,pay_bandwidth))
+
+data_orig$timeSpent <- as.numeric(data_orig$timeSpent)
+data_syn$timeSpent <- as.numeric(data_syn$timeSpent)
+data_orig$payloadSizeResponse <- as.numeric(data_orig$payloadSizeResponse)
+data_syn$payloadSizeResponse <- as.numeric(data_syn$payloadSizeResponse)
+data_orig$ts_bandwidth <- as.numeric(data_orig$ts_bandwidth)
+data_syn$ts_bandwidth <- as.numeric(data_syn$ts_bandwidth)
+data_orig$pay_bandwidth <- as.numeric(data_orig$pay_bandwidth)
+data_syn$pay_bandwidth <- as.numeric(data_syn$pay_bandwidth)
+
+
+data_orig <- data_orig %>% mutate( timeSpent = as.integer(timeSpent/ts_bandwidth)*ts_bandwidth,
+                                  payloadSizeResponse = as.integer(payloadSizeResponse/pay_bandwidth)*pay_bandwidth)
+
+data_syn <- data_syn %>% mutate( timeSpent = as.integer(timeSpent/ts_bandwidth)*ts_bandwidth,
+                                  payloadSizeResponse = as.integer(payloadSizeResponse/pay_bandwidth)*pay_bandwidth)
+
+#Initializa dependencies
+dependencies = list(c("clientIp","WeekHour"),
+        c("timeSpent","clientIp","destHostName"),
+        c("destHostName","clientIp"),
+        c("payloadSizeResponse","destHostName"),
+        c("httpMethod","destHostName","clientIp"),
+        c("httpResponseStatus","destHostName","httpMethod","clientIp"))
+
+```
+
+##Distribution of Original data vs Synthetic data
+```{r echo=FALSE}
+pvalues <- c()
+dep_list <- unlist(lapply(dependencies, function(d) { paste(unlist(d),collapse = ",")}))
+for(i in c(1:length(dependencies)))
+{
+  grouped_orig <- data_orig %>% group_by_(.dots=lapply(unlist(dependencies[i]), as.symbol)) %>% summarise(count_orig = n())
+
+  grouped_syn <- data_syn %>% group_by_(.dots=lapply(unlist(dependencies[i]), as.symbol)) %>% summarise(count_syn = n())
+  
+  #for(col in unlist(dependencies[i])){
+  #  print(col)
+  #  grouped_orig[col] <- as.character(grouped_orig[[col]])
+  #  grouped_syn[col] <-  as.character(grouped_syn[[col]])
+  #}
+  
+  group_joined <- grouped_orig %>% inner_join(grouped_syn) %>% arrange(count_orig)
+  
+  group_joined$parentHash <- do.call(paste,c(group_joined[unlist(dependencies[i])],sep=""))
+  
+  size_of_syn <- sum(grouped_syn$count_syn)
+  size_of_orig <- sum(grouped_orig$count_orig)
+  group_joined <- group_joined %>% mutate(expected_count = (count_orig/size_of_orig)*size_of_syn)
+    
+  if((nrow(group_joined)<10000) && (nrow(group_joined)>2)){
+      plot <-  ggplot(group_joined) + geom_line(aes(x=parentHash,y=expected_count,group=1),col="red", alpha=0.5,size=0.3) + 
+                         geom_line(aes(x=parentHash,y=count_syn,group=1),col="blue",alpha = 0.5,size=0.1) + 
+                         ggtitle(paste("Distribution of frequencies of values in columns ",
+                                       paste(unlist(dependencies[i]),collapse = ",")))+
+                         theme(axis.text.x = element_blank(),axis.ticks.x = element_blank())
+
+
+    print(plot)
+  }  
+  a <- chisq.test(group_joined[,c("expected_count","count_syn")])
+
+  pvalues[i] <- a$p.value
+  print(paste("P-value of ",paste(unlist(dependencies[i]),collapse = ","),"is",a$p.value))
+}
+
+p_value_data <- data.frame(dependency_vals = dep_list, p_value = pvalues)
+kable(p_value_data,caption = "P-values of original and synthetic data")
+```
+
