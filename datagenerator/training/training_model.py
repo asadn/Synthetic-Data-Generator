@@ -8,6 +8,7 @@ from datagenerator.pyfiles.general import generate_hash_string
 from datagenerator.pyfiles.general import kernel_density_estimate
 from datagenerator.pyfiles.general import bin_frequencies
 from datagenerator.pyfiles.general import extract_weekminute_probs
+from datagenerator.pyfiles.general import get_weekday_count
 import logging
 import json
 
@@ -357,6 +358,10 @@ class ModelTrainer(object):
                 (node_data[root_node].children).append(col)
 
         # return_data = node_data[root_node].children
+        self.data[root_node] = pd.to_datetime(self.data[root_node])
+        min_date = min(self.data[root_node])
+        max_date = max(self.data[root_node])
+        weekday_counts = get_weekday_count(min_date,max_date)
 
         for child in node_data[root_node].children: # Parallelize
             sub_cols = [root_node,child]
@@ -382,7 +387,9 @@ class ModelTrainer(object):
                 sub_data_dates = pd.DataFrame(sub_data_dates.unique())
                 sub_data_dates[0] = pd.to_datetime(sub_data_dates[0])
                 sub_data_weekday = sub_data_dates[0].apply(lambda ts: ts.weekday())
-                weekday_counts = sub_data_weekday.value_counts().to_dict()
+                weekday_counts_old = sub_data_weekday.value_counts().to_dict()
+
+                self.logger.debug("Old weekday count "+ str(weekday_counts_old) + "; New weekday count " + str(weekday_counts))
 
                 if node_data[root_node].time_bucket == "weekhour":
                     # Week hour counts
@@ -398,13 +405,18 @@ class ModelTrainer(object):
                     sub_data["DateHour"] = sub_data[root_node].apply(lambda dt: datetime.datetime(dt.year,dt.month,dt.day,dt.hour,0))
                     sub_data["WeekHour"] = sub_data[root_node].apply(lambda ts: ts.weekday()*24*60 +
                                                                                 ts.hour*60)
-                    # grouped = sub_data.groupby(['DateHour','WeekHour'],as_index=False)
+                    grouped = sub_data.groupby(['DateHour','WeekHour'],as_index=False)
                     # eventsPH = (((grouped.size().to_frame()).groupby(level=1)).mean())[0].to_dict()
                     grouped_dh = (grouped.size().to_frame()).groupby(level=1)
                     eventsPH_list = {k: list(v) for k,v in grouped_dh[0]}
                     eventsPH = {}
                     for date_hour in eventsPH_list.keys():
-                        bw,eventsPH[date_hour] = bin_frequencies(eventsPH_list[date_hour])
+                        bw, bin_freq = bin_frequencies(eventsPH_list[date_hour])
+                        for key in bin_freq.keys():
+                            if(bw>0):
+                                bin_freq[float(key+bw)/2] = bin_freq[key]
+                                del bin_freq[key]
+                        eventsPH[date_hour] = bin_freq
 
                 if node_data[root_node].time_probs.has_key(child):
                     node_data[root_node].time_probs[child][child_value] = kde_hour

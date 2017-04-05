@@ -19,7 +19,7 @@ class TestTraining(object):
     @classmethod
     def setupClass(self):
         logger.debug("Setting up")
-        filename = "tests/in_data/new_web_2users.csv"
+        filename = "tests/in_data/small_webproxy.csv"
         # filename = "tests/in_data/webdata.csv"
         overrides = {"port":"varchar", "httpResponse":"varchar"}
         dependencies = {"username":["timestamp"],
@@ -46,7 +46,7 @@ class TestTraining(object):
                                            "timestamp":"timestamp",
                                            "agent":"varchar",
                                            "sourceip":"varchar",
-                                           "destination":"varchar",                                           
+                                           "destination":"varchar",
                                            "destinationpIP":"varchar",
                                            "bytes_in":"int",
                                            "bytes_out":"int",
@@ -61,7 +61,7 @@ class TestTraining(object):
         logger.debug("Finished extracting Proxy data.... Generating")
         tree_data_proxy = Tree(self.training_data.model, self.training_data.header.keys())
         records = tree_data_proxy.generate_data(_start=datetime.datetime.strptime("2016-04-01 00:00", "%Y-%m-%d %H:%M"),
-                                _end=datetime.datetime.strptime("2016-04-20 00:00", "%Y-%m-%d %H:%M"),filename="new_web_2users_syn.csv")
+                                _end=datetime.datetime.strptime("2016-04-20 00:00", "%Y-%m-%d %H:%M"),filename="new_web_small_syn.csv")
         logger.debug("Finished generating data....")
         assert_equal(len(records)>1, True)
 
@@ -207,7 +207,7 @@ class TestTraining(object):
                         "destHostName":["clientIp"],
                         "payloadSizeResponse":["destHostName"],
                         "httpMethod":["destHostName","clientIp"],
-                        "httpResponseStatus":["destHostName","httpMethod","clientIp"]}
+                        "httpResponseStatus":["destHostName","clientIp"]}
         training_data = ModelTrainer(filename=filename,
                                             header="True",
                                             timestamp_cols=['timestamp'],
@@ -217,6 +217,6 @@ class TestTraining(object):
         training_data.print_time_taken()
 
         tree_data_nots = Tree(training_data.model, training_data.header.keys())
-        rnots_records = tree_data_nots.generate_data(_start=datetime.datetime.strptime("2016-04-01 00:00", "%Y-%m-%d %H:%M"),
-                                _end=datetime.datetime.strptime("2016-04-20 00:00", "%Y-%m-%d %H:%M"),filename="realdata_syn.csv")
+        rnots_records = tree_data_nots.generate_data(_start=datetime.datetime.strptime("2005-04-05 00:00", "%Y-%m-%d %H:%M"),
+                                _end=datetime.datetime.strptime("2005-04-30 00:00", "%Y-%m-%d %H:%M"),filename="realdata_syn.csv")
         assert_equal(len(rnots_records)>1, True)

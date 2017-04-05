@@ -172,8 +172,13 @@ class Tree(object):
                 #     print time_val
                 if (data_genNorm(["active", "inactive"],
                     [t_prob, 1-t_prob], 1) == "active"):
-                    no_of_events = random.poisson(
-                            root.number_eventsPH[child][childhash].get(time_val, 0))
+                    # no_of_events = random.poisson(
+                    #         root.number_eventsPH[child][childhash].get(time_val, 0))
+                    #logger.debug("events ph keys "+str(root.number_eventsPH[child][childhash]))
+                    noe_mean = data_genNorm(root.number_eventsPH[child][childhash][time_val].keys(),root.number_eventsPH[child][childhash][time_val].values(),1)
+                    logger.debug("No of events :"+str(datetime_val)+" : "+str(time_val)+" : "+str(noe_mean))
+                    no_of_events = random.poisson(int(noe_mean))
+                    # no_of_events = int(noe_mean)
                     tmp_records.extend([childhash]*no_of_events)
         for rec in tmp_records:
             r_val = rec.split(";")

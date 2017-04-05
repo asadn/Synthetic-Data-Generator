@@ -137,3 +137,14 @@ def minute_gen(number_of_events):
     mins = numpy.random.uniform(0,59,no_of_mins)
     mins_array = list(numpy.random.choice(mins, number_of_events, replace = True))
     return mins_array
+
+def get_weekday_count(min_date,max_date):
+    total_days = (max_date - min_date).days+1
+    min_wday = (min_date).weekday()
+    weekday_counts = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
+    for i in range(0,total_days):
+        if weekday_counts.has_key((i+min_wday)%7):
+            weekday_counts[(i+min_wday)%7] += 1
+        else:
+            weekday_counts[(i+min_wday)%7] = 1
+    return weekday_counts
