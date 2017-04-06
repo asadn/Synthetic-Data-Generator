@@ -299,7 +299,7 @@ class ModelTrainer(object):
                     # bandwidth, kde_vals = kernel_density_estimate(distinctparentsdata[col][parentskey])
                     bandwidth, kde_vals = bin_frequencies(distinctparentsdata[col][parentskey])
 
-                    self.logger.debug("bandwidth for (col,parents) " + col + ","+parentskey+" = "+str(bandwidth))
+                    # self.logger.debug("bandwidth for (col,parents) " + col + ","+parentskey+" = "+str(bandwidth))
                     # Remove bins with 0 probability in kde_vals
                     # for bin_val in kde_vals.keys():
                     #     if kde_vals[bin_val] < (0.000000000001):
@@ -310,7 +310,7 @@ class ModelTrainer(object):
             else:
                     bandwidth, kde_vals = bin_frequencies(distinctparentsdata[col])
 
-                    self.logger.debug("bandwidth for"+col+" = "+str(bandwidth))
+                    # self.logger.debug("bandwidth for"+col+" = "+str(bandwidth))
                     # Remove bins with 0 probability in kde_vals
                     # for bin_val in kde_vals.keys():
                     #     if kde_vals[bin_val] < (0.000000000001):
@@ -372,8 +372,8 @@ class ModelTrainer(object):
                 sub_data[root_node] = pd.to_datetime(sub_data[root_node])
 
                 #Extrach Week minute
-                sub_data["weekMinute"] = sub_data[root_node].apply(lambda ts: ts.weekday()*24*60 +
-                ts.hour*60 + ts.minute)
+                # sub_data["weekMinute"] = sub_data[root_node].apply(lambda ts: ts.weekday()*24*60 +
+                # ts.hour*60 + ts.minute)
 
                 ## Extract Minute probabilities using KDE
                 # bandwidth, kde_time = kernel_density_estimate(sub_data["weekMinute"].tolist(),list(np.arange(0,10040)))
@@ -383,13 +383,13 @@ class ModelTrainer(object):
 
                 ## Extracting probabilities using Frequencies
                 # Extract Weekday counts
-                sub_data_dates = sub_data[root_node].apply(lambda dt: datetime.datetime(dt.year,dt.month,dt.day,0,0))
-                sub_data_dates = pd.DataFrame(sub_data_dates.unique())
-                sub_data_dates[0] = pd.to_datetime(sub_data_dates[0])
-                sub_data_weekday = sub_data_dates[0].apply(lambda ts: ts.weekday())
-                weekday_counts_old = sub_data_weekday.value_counts().to_dict()
+                # sub_data_dates = sub_data[root_node].apply(lambda dt: datetime.datetime(dt.year,dt.month,dt.day,0,0))
+                # sub_data_dates = pd.DataFrame(sub_data_dates.unique())
+                # sub_data_dates[0] = pd.to_datetime(sub_data_dates[0])
+                # sub_data_weekday = sub_data_dates[0].apply(lambda ts: ts.weekday())
+                # weekday_counts_old = sub_data_weekday.value_counts().to_dict()
 
-                self.logger.debug("Old weekday count "+ str(weekday_counts_old) + "; New weekday count " + str(weekday_counts))
+                # self.logger.debug("Old weekday count "+ str(weekday_counts_old) + "; New weekday count " + str(weekday_counts))
 
                 if node_data[root_node].time_bucket == "weekhour":
                     # Week hour counts
@@ -412,10 +412,10 @@ class ModelTrainer(object):
                     eventsPH = {}
                     for date_hour in eventsPH_list.keys():
                         bw, bin_freq = bin_frequencies(eventsPH_list[date_hour])
-                        for key in bin_freq.keys():
-                            if(bw>0):
-                                bin_freq[float(key+bw)/2] = bin_freq[key]
-                                del bin_freq[key]
+                        # for key in bin_freq.keys():
+                        #     if(bw>0):
+                        #         bin_freq[float(key+bw)/2] = bin_freq[key]
+                        #         del bin_freq[key]
                         eventsPH[date_hour] = bin_freq
 
                 if node_data[root_node].time_probs.has_key(child):
