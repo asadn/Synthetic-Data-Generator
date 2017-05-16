@@ -64,8 +64,9 @@ class FloatCol(Column):
 
     def get_value(self, bin_val,bw):
         """ Returns a random value generated using the bin and bandwidth"""
-        value = random.uniform(bin_val, bin_val+bw, 1)
+        # value = random.uniform(bin_val, bin_val+bw, 1)
         # value = fabs(random.normal(bin_val,bw,1))
+        value = bin_val
         return float(value)
 
     def generate_value(self,rec):
@@ -89,8 +90,9 @@ class IntCol(Column):
 
     def get_value(self, bin_val,bw):
         """ Returns a random value generated using the bin and bandwidth"""
-        value = random.uniform(bin_val, bin_val+bw, 1)
+        # value = random.uniform(bin_val, bin_val+bw, 1)
         # value = fabs(random.normal(bin_val,bw,1))
+        value = bin_val
         return int(value)
 
     def generate_value(self,rec):
@@ -98,7 +100,7 @@ class IntCol(Column):
         hash_string = generate_hash_string(rec,self.parents)
         tmp_col_value = data_genNorm(self.c_p_t[hash_string].keys(),
                                  numpy.array(self.c_p_t[hash_string].values()),1)
-        col_value = self.get_value(int(tmp_col_value),self.bandwidth[hash_string])
+        col_value = self.get_value(int(tmp_col_value),self.bandwidth[hash_string])    
         return str(col_value)
 
 class TimestampCol(Column):
@@ -175,11 +177,12 @@ class Tree(object):
                     # no_of_events = random.poisson(
                     #         root.number_eventsPH[child][childhash].get(time_val, 0))
                     #logger.debug("events ph keys "+str(root.number_eventsPH[child][childhash]))
-                    noe_mean = data_genNorm(root.number_eventsPH[child][childhash][time_val].keys(),root.number_eventsPH[child][childhash][time_val].values(),1)
-                    no_of_events = random.poisson(int(noe_mean))
-                    if childhash == "Connie.Coletta":
-                        logger.debug("No of events for user "+childhash + " on " + str(datetime_val) +" : "+str(time_val)+" : "+str(noe_mean) +" -> " + str(no_of_events))
-                    # no_of_events = int(noe_mean)
+                    noe_mean = data_genNorm(root.number_eventsPH[child][childhash][time_val]["BinFreqs"].keys(),root.number_eventsPH[child][childhash][time_val]["BinFreqs"].values(),1)
+                    # no_of_events = random.poisson(int(noe_mean))
+                    # bandwidth = root.number_eventsPH[child][childhash][time_val]["bandwidth"]
+                    # no_of_events = int(random.uniform(noe_mean,noe_mean+bandwidth,1)[0])
+                    no_of_events = int(noe_mean)
+                    print(no_of_events)
                     tmp_records.extend([childhash]*no_of_events)
         for rec in tmp_records:
             r_val = rec.split(";")
