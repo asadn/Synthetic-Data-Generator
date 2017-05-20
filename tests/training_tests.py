@@ -19,7 +19,7 @@ class TestTraining(object):
     @classmethod
     def setupClass(self):
         logger.debug("Setting up")
-        filename = "tests/in_data/small_sample_webproxy_new.csv"
+        filename = "tests/in_data/small_webproxy.csv"
         # filename = "tests/in_data/webdata.csv"
         overrides = {"port":"varchar", "httpResponse":"varchar"}
         dependencies = {"username":["timestamp"],
@@ -196,9 +196,36 @@ class TestTraining(object):
     #                             _end=datetime.datetime.strptime("21/12/06 00:00", "%d/%m/%y %H:%M"),filename="ADdata.csv")
     #     logger.debug("Finished Generating AD data")
     #     assert_equal(len(records)>1, True)
-    # def test_real_proxy_data(self):
-    #     logger.debug("\n\nTest real webproxy dataset\n=================\n")
-    #     filename = "tests/in_data/realProxy_filtered_100K.csv"
+
+    def test_real_proxy_data(self):
+        logger.debug("\n\nTest real webproxy dataset\n=================\n")
+        filename = "tests/in_data/realProxy_filtered_100K_3users.csv"
+        # filename = "tests/in_data/webdata.csv"
+        overrides = {"port":"varchar", "httpResponseStatus":"varchar"}
+        dependencies = {"clientIp":["timestamp"],
+                        "timestamp":[],
+                        "timeSpent":["clientIp","destHostName"],
+                        "destHostName":["clientIp"],
+                        "payloadSizeResponse":["destHostName"],
+                        "httpMethod":["destHostName","clientIp"],
+                        "httpResponseStatus":["destHostName","clientIp"]}
+        training_data = ModelTrainer(filename=filename,
+                                            header="True",
+                                            timestamp_cols=['timestamp'],
+                                            timestamp_format='%Y-%m-%dT%H:%M:%S',
+                                            dependencies=dependencies,
+                                            overrides = overrides,delimitter="\t")
+        training_data.print_time_taken()
+
+        tree_data_nots = Tree(training_data.model, training_data.header.keys())
+        rnots_records = tree_data_nots.generate_data(_start=datetime.datetime.strptime("2005-04-05 00:00", "%Y-%m-%d %H:%M"),
+                                _end=datetime.datetime.strptime("2005-04-12 00:00", "%Y-%m-%d %H:%M"),filename="realdata_syn_users.csv")
+        assert_equal(len(rnots_records)>1, True)
+
+
+    # def test_ssc_proxy_data(self):
+    #     logger.debug("\n\nTest real realAD dataset\n=================\n")
+    #     filename = "tests/in_data/SSC.csv"
     #     # filename = "tests/in_data/webdata.csv"
     #     overrides = {"port":"varchar", "httpResponseStatus":"varchar"}
     #     dependencies = {"clientIp":["timestamp"],
@@ -215,8 +242,8 @@ class TestTraining(object):
     #                                         dependencies=dependencies,
     #                                         overrides = overrides,delimitter="\t")
     #     training_data.print_time_taken()
-
+    #
     #     tree_data_nots = Tree(training_data.model, training_data.header.keys())
     #     rnots_records = tree_data_nots.generate_data(_start=datetime.datetime.strptime("2005-04-05 00:00", "%Y-%m-%d %H:%M"),
-    #                             _end=datetime.datetime.strptime("2005-04-30 00:00", "%Y-%m-%d %H:%M"),filename="realdata_syn.csv")
+    #                             _end=datetime.datetime.strptime("2005-04-30 00:00", "%Y-%m-%d %H:%M"),filename="realdata_ad.csv")
     #     assert_equal(len(rnots_records)>1, True)

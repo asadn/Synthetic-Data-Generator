@@ -62,7 +62,10 @@ def generate_hash_string(cols, parents_list):
 def extract_weekminute_probs(weektime_counts,weekday_counts):
     weektime_probs = {}
     for w_bucket in weektime_counts.keys():
-            weektime_probs[w_bucket] = float(weektime_counts[w_bucket])/weekday_counts[int(w_bucket/(24*60))]
+            if weekday_counts[int(w_bucket/(24*60))] != 0:
+                weektime_probs[w_bucket] = float(weektime_counts[w_bucket])/weekday_counts[int(w_bucket/(24*60))]
+            else:
+                weektime_probs[w_bucket] = 0
     return weektime_probs
 
 def bin_frequencies(value_list,points=None):
@@ -142,7 +145,7 @@ def get_weekday_count(min_date,max_date):
     total_days = (max_date - min_date).days+1
     min_wday = (min_date).weekday()
     weekday_counts = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
-    for i in range(0,total_days):
+    for i in range(0,total_days+1):
         if weekday_counts.has_key((i+min_wday)%7):
             weekday_counts[(i+min_wday)%7] += 1
         else:

@@ -299,7 +299,7 @@ class ModelTrainer(object):
                     # bandwidth, kde_vals = kernel_density_estimate(distinctparentsdata[col][parentskey])
                     bandwidth, kde_vals = bin_frequencies(distinctparentsdata[col][parentskey])
 
-                    # self.logger.debug("bandwidth for (col,parents) " + col + ","+parentskey+" = "+str(bandwidth))
+                    self.logger.debug("bandwidth for (col,parents) " + col + ","+parentskey+" = "+str(bandwidth))
                     # Remove bins with 0 probability in kde_vals
                     # for bin_val in kde_vals.keys():
                     #     if kde_vals[bin_val] < (0.000000000001):
@@ -362,6 +362,7 @@ class ModelTrainer(object):
         min_date = min(self.data[root_node])
         max_date = max(self.data[root_node])
         weekday_counts = get_weekday_count(min_date,max_date)
+        self.logger.debug("New weekday count " + str(weekday_counts))
 
         for child in node_data[root_node].children: # Parallelize
             sub_cols = [root_node,child]
@@ -388,8 +389,8 @@ class ModelTrainer(object):
                 # sub_data_dates[0] = pd.to_datetime(sub_data_dates[0])
                 # sub_data_weekday = sub_data_dates[0].apply(lambda ts: ts.weekday())
                 # weekday_counts_old = sub_data_weekday.value_counts().to_dict()
-
-                # self.logger.debug("Old weekday count "+ str(weekday_counts_old) + "; New weekday count " + str(weekday_counts))
+                #
+                # self.logger.debug("New weekday count " + str(weekday_counts))
 
                 if node_data[root_node].time_bucket == "weekhour":
                     # Week hour counts
@@ -416,7 +417,9 @@ class ModelTrainer(object):
                         #     if(bw>0):
                         #         bin_freq[float(key+bw)/2] = bin_freq[key]
                         #         del bin_freq[key]
-                        eventsPH[date_hour] = bin_freq
+                        eventsPH[date_hour] = {}
+                        eventsPH[date_hour]["BinFreqs"] = bin_freq
+                        eventsPH[date_hour]["bandwidth"] = bw
 
                 if node_data[root_node].time_probs.has_key(child):
                     node_data[root_node].time_probs[child][child_value] = kde_hour
