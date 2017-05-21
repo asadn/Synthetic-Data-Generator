@@ -296,8 +296,8 @@ class ModelTrainer(object):
             if node_data[col].level !=0:
                 for parentskey in distinctparentsdata[col].keys():
                     # Get Kernel density estimates for given data
-                    # bandwidth, kde_vals = kernel_density_estimate(distinctparentsdata[col][parentskey])
-                    bandwidth, kde_vals = bin_frequencies(distinctparentsdata[col][parentskey])
+                    bandwidth, kde_vals = kernel_density_estimate(distinctparentsdata[col][parentskey])
+                    # bandwidth, kde_vals = bin_frequencies(distinctparentsdata[col][parentskey])
 
                     self.logger.debug("bandwidth for (col,parents) " + col + ","+parentskey+" = "+str(bandwidth))
                     # Remove bins with 0 probability in kde_vals

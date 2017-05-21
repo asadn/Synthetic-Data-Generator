@@ -65,8 +65,8 @@ class FloatCol(Column):
     def get_value(self, bin_val,bw):
         """ Returns a random value generated using the bin and bandwidth"""
         # value = random.uniform(bin_val, bin_val+bw, 1)
-        # value = fabs(random.normal(bin_val,bw,1))
-        value = bin_val
+        value = fabs(random.normal(bin_val,bw,1))
+        # value = bin_val
         return float(value)
 
     def generate_value(self,rec):
@@ -91,8 +91,8 @@ class IntCol(Column):
     def get_value(self, bin_val,bw):
         """ Returns a random value generated using the bin and bandwidth"""
         # value = random.uniform(bin_val, bin_val+bw, 1)
-        # value = fabs(random.normal(bin_val,bw,1))
-        value = bin_val
+        value = fabs(random.normal(bin_val,bw,1))
+        # value = bin_val
         return int(value)
 
     def generate_value(self,rec):

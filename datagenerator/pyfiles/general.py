@@ -12,8 +12,8 @@ def kernel_density_estimate(value_list,points=None):
     no_of_values = len(value_list)
     std_dev = np.std(value_list)
     iqr = get_quartile_range(value_list) # Interquartile range
-    min_iqr_sd = min(std_dev,iqr)
-    bandwidth = min_iqr_sd*((float(4)/(3*no_of_values))**(1.0/5))
+    min_iqr_sd = min(std_dev,iqr/1.34)
+    bandwidth = 0.55*min_iqr_sd*((no_of_values)**(-1.0/5))
     if bandwidth == 0:
         return 0,{sum(value_list)/no_of_values: 1}
     # Generate bins
@@ -67,7 +67,7 @@ def extract_weekminute_probs(weektime_counts,weekday_counts):
             else:
                 weektime_probs[w_bucket] = 0
     return weektime_probs
-
+ 
 def bin_frequencies(value_list,points=None):
     """ Returns KDE values and bandwidth for given list of numbers """
     # Find bandwidth
@@ -80,7 +80,7 @@ def bin_frequencies(value_list,points=None):
     std_dev = np.std(value_list)
     iqr = get_quartile_range(value_list) # Interquartile range
     min_iqr_sd = min(std_dev,iqr)
-    bandwidth = min_iqr_sd*((float(4)/(3*no_of_values))**(1.0/5))
+    bandwidth = 0.55*min_iqr_sd*((no_of_values)**(-1.0/5))
     if bandwidth == 0:
         return 0,{sum(value_list)/no_of_values: 1}
     # Generate bins

@@ -19,7 +19,7 @@ class TestTraining(object):
     @classmethod
     def setupClass(self):
         logger.debug("Setting up")
-        filename = "tests/in_data/small_webproxy.csv"
+        filename = "tests/in_data/new_web_2users.csv"
         # filename = "tests/in_data/webdata.csv"
         overrides = {"port":"varchar", "httpResponse":"varchar"}
         dependencies = {"username":["timestamp"],
@@ -61,7 +61,7 @@ class TestTraining(object):
         logger.debug("Finished extracting Proxy data.... Generating")
         tree_data_proxy = Tree(self.training_data.model, self.training_data.header.keys())
         records = tree_data_proxy.generate_data(_start=datetime.datetime.strptime("2016-04-01 00:00", "%Y-%m-%d %H:%M"),
-                                _end=datetime.datetime.strptime("2016-04-20 00:00", "%Y-%m-%d %H:%M"),filename="new_web_small_syn.csv")
+                                _end=datetime.datetime.strptime("2016-04-20 00:00", "%Y-%m-%d %H:%M"),filename="new_web_2users_syn.csv")
         logger.debug("Finished generating data....")
         assert_equal(len(records)>1, True)
 
@@ -149,25 +149,25 @@ class TestTraining(object):
     #     rnots_records = tree_data_nots.generate_data(counts=10000,filename="nots_webdata.csv")
     #     assert_equal(len(rnots_records)>1, True)
     # #
-    # def test_iris_data(self):
-    #     logger.debug("\n\nTest get data with iris dataset\n=================\n")
-    #     filename = "tests/in_data/irisdata.csv"
-    #     # filename = "tests/in_data/webdata.csv"
-    #     overrides = {}
-    #     dependencies = {"class":[],
-    #             "sepal_length":["class"],
-    #             "sepal_width":["class"],
-    #             "petal_length":["class"],
-    #             "petal_width":["class"]}
-    #     training_data = ModelTrainer(filename=filename,
-    #                                         header="True",
-    #                                         dependencies=dependencies,
-    #                                         overrides = overrides)
-    #     training_data.print_time_taken()
+    def test_iris_data(self):
+        logger.debug("\n\nTest get data with iris dataset\n=================\n")
+        filename = "tests/in_data/irisdata.csv"
+        # filename = "tests/in_data/webdata.csv"
+        overrides = {}
+        dependencies = {"class":[],
+                "sepal_length":["class"],
+                "sepal_width":["class"],
+                "petal_length":["class"],
+                "petal_width":["class"]}
+        training_data = ModelTrainer(filename=filename,
+                                            header="True",
+                                            dependencies=dependencies,
+                                            overrides = overrides)
+        training_data.print_time_taken()
 
-    #     tree_data_nots = Tree(training_data.model, training_data.header.keys())
-    #     rnots_records = tree_data_nots.generate_data(counts=150,filename="irisdata_syn.csv")
-    #     assert_equal(len(rnots_records)>1, True)
+        tree_data_nots = Tree(training_data.model, training_data.header.keys())
+        rnots_records = tree_data_nots.generate_data(counts=500,filename="irisdata_syn.csv")
+        assert_equal(len(rnots_records)>1, True)
 
     # def test_ad_data(self):
     #     logger.debug("\n\nTest get data with AD dataset\n=================\n")
@@ -197,30 +197,30 @@ class TestTraining(object):
     #     logger.debug("Finished Generating AD data")
     #     assert_equal(len(records)>1, True)
 
-    def test_real_proxy_data(self):
-        logger.debug("\n\nTest real webproxy dataset\n=================\n")
-        filename = "tests/in_data/realProxy_filtered_100K_3users.csv"
-        # filename = "tests/in_data/webdata.csv"
-        overrides = {"port":"varchar", "httpResponseStatus":"varchar"}
-        dependencies = {"clientIp":["timestamp"],
-                        "timestamp":[],
-                        "timeSpent":["clientIp","destHostName"],
-                        "destHostName":["clientIp"],
-                        "payloadSizeResponse":["destHostName"],
-                        "httpMethod":["destHostName","clientIp"],
-                        "httpResponseStatus":["destHostName","clientIp"]}
-        training_data = ModelTrainer(filename=filename,
-                                            header="True",
-                                            timestamp_cols=['timestamp'],
-                                            timestamp_format='%Y-%m-%dT%H:%M:%S',
-                                            dependencies=dependencies,
-                                            overrides = overrides,delimitter="\t")
-        training_data.print_time_taken()
+    # def test_real_proxy_data(self):
+    #     logger.debug("\n\nTest real webproxy dataset\n=================\n")
+    #     filename = "tests/in_data/realProxy_filtered_100K_3users.csv"
+    #     # filename = "tests/in_data/webdata.csv"
+    #     overrides = {"port":"varchar", "httpResponseStatus":"varchar"}
+    #     dependencies = {"clientIp":["timestamp"],
+    #                     "timestamp":[],
+    #                     "timeSpent":["clientIp","destHostName"],
+    #                     "destHostName":["clientIp"],
+    #                     "payloadSizeResponse":["destHostName"],
+    #                     "httpMethod":["destHostName","clientIp"],
+    #                     "httpResponseStatus":["destHostName","clientIp"]}
+    #     training_data = ModelTrainer(filename=filename,
+    #                                         header="True",
+    #                                         timestamp_cols=['timestamp'],
+    #                                         timestamp_format='%Y-%m-%dT%H:%M:%S',
+    #                                         dependencies=dependencies,
+    #                                         overrides = overrides,delimitter="\t")
+    #     training_data.print_time_taken()
 
-        tree_data_nots = Tree(training_data.model, training_data.header.keys())
-        rnots_records = tree_data_nots.generate_data(_start=datetime.datetime.strptime("2005-04-05 00:00", "%Y-%m-%d %H:%M"),
-                                _end=datetime.datetime.strptime("2005-04-12 00:00", "%Y-%m-%d %H:%M"),filename="realdata_syn_users.csv")
-        assert_equal(len(rnots_records)>1, True)
+    #     tree_data_nots = Tree(training_data.model, training_data.header.keys())
+    #     rnots_records = tree_data_nots.generate_data(_start=datetime.datetime.strptime("2005-04-05 00:00", "%Y-%m-%d %H:%M"),
+    #                             _end=datetime.datetime.strptime("2005-04-12 00:00", "%Y-%m-%d %H:%M"),filename="realdata_syn_users.csv")
+    #     assert_equal(len(rnots_records)>1, True)
 
 
     # def test_ssc_proxy_data(self):
@@ -247,3 +247,6 @@ class TestTraining(object):
     #     rnots_records = tree_data_nots.generate_data(_start=datetime.datetime.strptime("2005-04-05 00:00", "%Y-%m-%d %H:%M"),
     #                             _end=datetime.datetime.strptime("2005-04-30 00:00", "%Y-%m-%d %H:%M"),filename="realdata_ad.csv")
     #     assert_equal(len(rnots_records)>1, True)
+    
+    # def test_kde(self):
+    #     
