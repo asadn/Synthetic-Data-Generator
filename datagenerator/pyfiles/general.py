@@ -12,7 +12,12 @@ def kernel_density_estimate(value_list,points=None):
     no_of_values = len(value_list)
     std_dev = np.std(value_list)
     iqr = get_quartile_range(value_list) # Interquartile range
-    min_iqr_sd = min(std_dev,iqr/1.34)
+    if iqr == 0:
+        min_iqr_sd = std_dev
+    elif std_dev == 0:
+        min_iqr_sd = float(iqr)/1.34
+    else:
+        min_iqr_sd = min(std_dev,float(iqr)/1.34)
     bandwidth = 0.55*min_iqr_sd*((no_of_values)**(-1.0/5))
     if bandwidth == 0:
         return 0,{sum(value_list)/no_of_values: 1}

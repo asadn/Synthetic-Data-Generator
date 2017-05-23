@@ -65,7 +65,12 @@ class FloatCol(Column):
     def get_value(self, bin_val,bw):
         """ Returns a random value generated using the bin and bandwidth"""
         # value = random.uniform(bin_val, bin_val+bw, 1)
-        value = fabs(random.normal(bin_val,bw,1))
+        if(bw == 0):
+            return int(bin_val)
+        else:
+            value = random.normal(bin_val,bw,1)
+            if value <0:
+                value = 0
         # value = bin_val
         return float(value)
 
@@ -91,7 +96,12 @@ class IntCol(Column):
     def get_value(self, bin_val,bw):
         """ Returns a random value generated using the bin and bandwidth"""
         # value = random.uniform(bin_val, bin_val+bw, 1)
-        value = fabs(random.normal(bin_val,bw,1))
+        if(bw == 0):
+            return int(bin_val)
+        else:
+            value = random.normal(bin_val,bw,1)
+            if value <0:
+                value = 0
         # value = bin_val
         return int(value)
 
@@ -182,7 +192,7 @@ class Tree(object):
                     # bandwidth = root.number_eventsPH[child][childhash][time_val]["bandwidth"]
                     # no_of_events = int(random.uniform(noe_mean,noe_mean+bandwidth,1)[0])
                     no_of_events = int(noe_mean)
-                    print(no_of_events)
+                    # print(no_of_events)
                     tmp_records.extend([childhash]*no_of_events)
         for rec in tmp_records:
             r_val = rec.split(";")

@@ -291,20 +291,22 @@ class ModelTrainer(object):
                         distinctparentsdata[col] = [row[col]]
 
         """ Extract probability and bandwidth """
-
+        # if(distinctparentsdata.has_key('payloadSizeResponse')):
+        #    self.logger.debug("values of 10.0.1.2;www.ositis.com = " + ", ".join([str(i) for i in distinctparentsdata['payloadSizeResponse']["www.ositis.com"]]))
         for col in numeric_cols:
             if node_data[col].level !=0:
                 for parentskey in distinctparentsdata[col].keys():
                     # Get Kernel density estimates for given data
                     bandwidth, kde_vals = kernel_density_estimate(distinctparentsdata[col][parentskey])
-                    # bandwidth, kde_vals = bin_frequencies(distinctparentsdata[col][parentskey])
+                    # bandwidth, kde_vals = bin_freuqencies(distinctparentsdata[col][parentskey])
 
                     self.logger.debug("bandwidth for (col,parents) " + col + ","+parentskey+" = "+str(bandwidth))
                     # Remove bins with 0 probability in kde_vals
                     # for bin_val in kde_vals.keys():
                     #     if kde_vals[bin_val] < (0.000000000001):
                     #         del kde_vals[bin_val]
-
+                    # if parentskey == "www.ositis.com":
+                    #     self.logger.debug("kde_vals = " + str(kde_vals))
                     node_data[col].c_p_t[parentskey] = kde_vals
                     node_data[col].bandwidth[parentskey] = bandwidth
             else:

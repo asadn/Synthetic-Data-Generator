@@ -15,8 +15,8 @@ def data_genNorm(values, probs, size): #generates list of length 'size' of eleme
     total = round(sum(probs),8)
     probs2 = [float(round(p,8))/float(round(total,8)) for p in probs]
     bin = numpy.add.accumulate(probs2)
+    bin[len(bin)-1] = 1.0
     index = numpy.digitize(random_sample(size), bin)[0]
-    print 
     return values[index]
 
 def interval_gen(rateParameter):
