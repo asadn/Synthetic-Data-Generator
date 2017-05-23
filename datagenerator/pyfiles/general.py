@@ -72,7 +72,7 @@ def extract_weekminute_probs(weektime_counts,weekday_counts):
             else:
                 weektime_probs[w_bucket] = 0
     return weektime_probs
- 
+
 def bin_frequencies(value_list,points=None):
     """ Returns KDE values and bandwidth for given list of numbers """
     # Find bandwidth

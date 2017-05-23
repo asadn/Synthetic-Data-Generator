@@ -16,10 +16,8 @@ logger = logging.getLogger(__name__)
 
 class Column(object):
     """ Parent class of all columns """
-
     def __init__(self, name, col_type, position, level, is_root="No",
                  parents=None, parentscount=None, logger=None):
-        self.logger = logging.getLogger(__name__)
         self.name = name
         self.col_type = col_type
         self.is_root = is_root
@@ -36,13 +34,17 @@ class Column(object):
 class VarcharCol(Column):
     """ Used to store float data type information """
     col_type = "varchar"
-
-    def __init__(self, c_p_t, name, position, level, is_root, parents,
-            parentscount):
-        super(VarcharCol, self).__init__(name, self.col_type, position, level,
-                is_root, parents, parentscount)
-        self.c_p_t = c_p_t
-
+    def __init__(self, *initial_data, **kwargs):
+        if bool(kwargs):
+            super(VarcharCol, self).__init__(kwargs['name'], self.col_type, kwargs['position'], kwargs['level'],
+                    kwargs['is_root'], kwargs['parents'] if kwargs.has_key('parents') else None, kwargs['parentscount'] if kwargs.has_key('parents') else None)
+            self.c_p_t = kwargs['c_p_t']
+        """create object from stored file """
+        dict_in = initial_data[0] if len(initial_data)>0 else {}
+        if bool(dict_in):
+            super(VarcharCol, self).__init__(dict_in['name'], self.col_type, dict_in['position'], dict_in['level'],
+                    dict_in['is_root'], dict_in['parents'] if dict_in.has_key('parents') else None, dict_in['parentscount'] if dict_in.has_key('parents') else None)
+            self.c_p_t = dict_in['c_p_t']
     def generate_value(self,rec):
         """ Gets value from CPT for given parents """
         hash_string = generate_hash_string(rec,self.parents)
@@ -54,14 +56,18 @@ class VarcharCol(Column):
 class FloatCol(Column):
     """ Used to store float data type information """
     col_type = "float"
-
-    def __init__(self, bandwidth, c_p_t, name, position, level, is_root, parents,
-                 parentscount):
-        super(FloatCol, self).__init__(name, self.col_type, position, level,
-                                       is_root, parents, parentscount)
-        self.bandwidth = bandwidth
-        self.c_p_t = c_p_t
-
+    def __init__(self, *initial_data, **kwargs):
+        if bool(kwargs):
+            super(FloatCol, self).__init__(kwargs['name'], self.col_type, kwargs['position'], kwargs['level'],
+                    kwargs['is_root'], kwargs['parents'] if kwargs.has_key('parents') else None, kwargs['parentscount'] if kwargs.has_key('parents') else None)
+            self.bandwidth = kwargs['bandwidth']
+            self.c_p_t = kwargs['c_p_t']
+        dict_in = initial_data[0] if len(initial_data)>0 else {}
+        if bool(dict_in):
+            super(FloatCol, self).__init__(dict_in['name'], self.col_type, dict_in['position'], dict_in['level'],
+                    dict_in['is_root'], dict_in['parents'] if dict_in.has_key('parents') else None, dict_in['parentscount'] if dict_in.has_key('parents') else None)
+            self.bandwidth = dict_in['bandwidth']
+            self.c_p_t = dict_in['c_p_t']
     def get_value(self, bin_val,bw):
         """ Returns a random value generated using the bin and bandwidth"""
         # value = random.uniform(bin_val, bin_val+bw, 1)
@@ -73,7 +79,6 @@ class FloatCol(Column):
                 value = 0
         # value = bin_val
         return float(value)
-
     def generate_value(self,rec):
         """ Gets value from CPT for given parents """
         hash_string = generate_hash_string(rec,self.parents)
@@ -85,14 +90,18 @@ class FloatCol(Column):
 class IntCol(Column):
     """ Used to store int data type information """
     col_type = "int"
-
-    def __init__(self, bandwidth, c_p_t, name, position, level, is_root, parents,
-                 parentscount):
-        super(IntCol, self).__init__(name, self.col_type, position, level,
-                                     is_root, parents, parentscount)
-        self.bandwidth = bandwidth
-        self.c_p_t = c_p_t
-
+    def __init__(self, *initial_data, **kwargs):
+        if bool(kwargs):
+            super(IntCol, self).__init__(kwargs['name'], self.col_type, kwargs['position'], kwargs['level'],
+                    kwargs['is_root'], kwargs['parents'] if kwargs.has_key('parents') else None, kwargs['parentscount'] if kwargs.has_key('parents') else None)
+            self.bandwidth = kwargs['bandwidth']
+            self.c_p_t = kwargs['c_p_t']
+        dict_in = initial_data[0] if len(initial_data)>0 else {}
+        if bool(dict_in):
+            super(IntCol, self).__init__(dict_in['name'], self.col_type, dict_in['position'], dict_in['level'],
+                    dict_in['is_root'], dict_in['parents'] if dict_in.has_key('parents') else None, dict_in['parentscount'] if dict_in.has_key('parents') else None)
+            self.bandwidth = dict_in['bandwidth']
+            self.c_p_t = dict_in['c_p_t']
     def get_value(self, bin_val,bw):
         """ Returns a random value generated using the bin and bandwidth"""
         # value = random.uniform(bin_val, bin_val+bw, 1)
@@ -104,29 +113,36 @@ class IntCol(Column):
                 value = 0
         # value = bin_val
         return int(value)
-
     def generate_value(self,rec):
         """ Gets value from CPT for given parents """
         hash_string = generate_hash_string(rec,self.parents)
         tmp_col_value = data_genNorm(self.c_p_t[hash_string].keys(),
                                  numpy.array(self.c_p_t[hash_string].values()),1)
-        col_value = self.get_value(int(tmp_col_value),self.bandwidth[hash_string])    
+        col_value = self.get_value(int(tmp_col_value),self.bandwidth[hash_string])
         return str(col_value)
 
 class TimestampCol(Column):
     """ Modified version of timestamp type """
     col_type = "timestamp"
 
-    def __init__(self, ts_format, children, time_bucket, time_probs, number_eventsPH,
-                 name, position, level, is_root, parents,
-                 parentscount):
-        super(TimestampCol, self).__init__(name, self.col_type, position, level,
-                                           is_root, parents, parentscount)
-        self.ts_format = ts_format
-        self.children = children
-        self.time_bucket = time_bucket
-        self.time_probs = time_probs
-        self.number_eventsPH = number_eventsPH
+    def __init__(self, *initial_data, **kwargs):
+        if bool(kwargs):
+            super(TimestampCol, self).__init__(kwargs['name'], self.col_type, kwargs['position'], kwargs['level'],
+                                               kwargs['is_root'], kwargs['parents'] if kwargs.has_key('parents') else None, kwargs['parentscount'] if kwargs.has_key('parents') else None)
+            self.ts_format = kwargs['ts_format']
+            self.children = kwargs['children']
+            self.time_bucket = kwargs['time_bucket']
+            self.time_probs = kwargs['time_probs']
+            self.number_eventsPH = kwargs['number_eventsPH']
+        dict_in = initial_data[0] if len(initial_data)>0 else {}
+        if bool(dict_in):
+            super(TimestampCol, self).__init__(dict_in['name'], self.col_type, dict_in['position'], dict_in['level'],
+                                               dict_in['is_root'], dict_in['parents'] if dict_in.has_key('parents') else None, dict_in['parentscount'] if dict_in.has_key('parents') else None)
+            self.ts_format = dict_in['ts_format']
+            self.children = dict_in['children']
+            self.time_bucket = dict_in['time_bucket']
+            self.time_probs = dict_in['time_probs']
+            self.number_eventsPH = dict_in['number_eventsPH']
 
     def print_date(self, _timestamp):
         """ Returns the formatted timestamp """
