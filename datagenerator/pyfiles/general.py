@@ -48,33 +48,8 @@ def get_quartile_range(value_list):
     # Return the difference of Q3 and Q1 as IQR
     return np.subtract(*np.percentile(value_list, [75,25]))
 
-def generate_dates(_start, _end):
-    """Generates dates between given start and end """
-    new_start = _start.replace(hour=0, minute=0, second=0, microsecond=0)
-    new_end = _end.replace(hour=0, minute=0, second=0, microsecond=0)
-    delta = new_end - new_start
-    dates = []
-    for d in range(delta.days + 1):
-        dates.append(new_start + timedelta(days=d))
-    return dates
-
-def generate_hash_string(cols, parents_list):
-    hash_string = str(cols[parents_list[0]])
-    for parent in parents_list[1:]:
-        hash_string += ";" + str(cols[parent])
-    return hash_string
-
-def extract_weekminute_probs(weektime_counts,weekday_counts):
-    weektime_probs = {}
-    for w_bucket in weektime_counts.keys():
-            if weekday_counts[int(w_bucket/(24*60))] != 0:
-                weektime_probs[w_bucket] = float(weektime_counts[w_bucket])/weekday_counts[int(w_bucket/(24*60))]
-            else:
-                weektime_probs[w_bucket] = 0
-    return weektime_probs
-
 def bin_frequencies(value_list,points=None):
-    """ Returns KDE values and bandwidth for given list of numbers """
+    """ Returns histogram points of given value list """
     # Find bandwidth
     # Use Silverman's rule of thumb to get bandwidth
     densities = {}
@@ -100,6 +75,33 @@ def bin_frequencies(value_list,points=None):
     return bandwidth,densities
 
 
+def generate_dates(_start, _end):
+    """Generates dates between given start and end """
+    new_start = _start.replace(hour=0, minute=0, second=0, microsecond=0)
+    new_end = _end.replace(hour=0, minute=0, second=0, microsecond=0)
+    delta = new_end - new_start
+    dates = []
+    for d in range(delta.days + 1):
+        dates.append(new_start + timedelta(days=d))
+    return dates
+
+def generate_hash_string(cols, parents_list):
+    """ Used to combine parent values to a single string """
+    hash_string = str(cols[parents_list[0]])
+    for parent in parents_list[1:]:
+        hash_string += ";" + str(cols[parent])
+    return hash_string
+
+def extract_weekminute_probs(weektime_counts,weekday_counts):
+    """ Returns probability of each minute of the week given its count and weekday count  """
+    weektime_probs = {}
+    for w_bucket in weektime_counts.keys():
+            if weekday_counts[int(w_bucket/(24*60))] != 0:
+                weektime_probs[w_bucket] = float(weektime_counts[w_bucket])/weekday_counts[int(w_bucket/(24*60))]
+            else:
+                weektime_probs[w_bucket] = 0
+    return weektime_probs
+
 def minute_gen(number_of_events):
     """ Function that generates a list of minutes based on the number of events """
     no_of_mins = 0
@@ -114,9 +116,7 @@ def minute_gen(number_of_events):
         if(min_interval == 20):
             no_of_mins = numpy.random.choice(range(1,21),1)
         elif(min_interval == 60):
-            #print(number_of_events)
             no_of_mins = numpy.random.choice(range(21,number_of_events+1),1)
-            #print(no_of_mins)
     else:
         if(number_of_events < 100):
             p20 = 0.957
@@ -147,6 +147,7 @@ def minute_gen(number_of_events):
     return mins_array
 
 def get_weekday_count(min_date,max_date):
+    """ Generate count of each weekday between min_date and max_date"""
     total_days = (max_date - min_date).days+1
     min_wday = (min_date).weekday()
     weekday_counts = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}

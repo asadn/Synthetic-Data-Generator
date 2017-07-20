@@ -26,6 +26,7 @@ class ModelTrainer(object):
 
         if header == "True":
             self.data = pd.DataFrame(pd.read_csv(filename, header=0,sep=delimitter))
+            self.data = self.data.replace(np.nan, '', regex=True)
         else:
             self.data = pd.read_csv(filename, header=None,sep=delimitter)
         # TODO: handle columns with NaN
@@ -209,31 +210,23 @@ class ModelTrainer(object):
 
         sub_cols = list(set(sub_cols))
         # Extract cpt from data
-        for index, row in self.data[sub_cols].iterrows():
-            for col in varchar_cols:
-                if node_data[col].level != 0:
-                    hash_string = generate_hash_string(row, self.dependencies[col])
-                    if node_data[col].c_p_t.has_key(hash_string):
-                        if node_data[col].c_p_t[hash_string].has_key(row[col]):
-                            node_data[col].c_p_t[hash_string][row[col]] += 1
-                        else:
-                            node_data[col].c_p_t[hash_string][row[col]] = 1
-                    else:
-                        node_data[col].c_p_t[hash_string] = {}
-                        node_data[col].c_p_t[hash_string][row[col]] = 1
+        for col in varchar_cols:
 
-                    # Update Parents count
-                    if node_data[col].parentscount.has_key(hash_string):
-                        node_data[col].parentscount[hash_string] += 1
-                    else:
-                        node_data[col].parentscount[hash_string] = 1
-                else:
-                    # In case of root node
-                    if node_data[col].c_p_t.has_key(row[col]):
-                        node_data[col].c_p_t[row[col]] += 1
-                    else:
-                        node_data[col].c_p_t[row[col]] = 1
-                #TODO : get probability using parents count
+            if node_data[col].level != 0:
+                parents = node_data[col].parents
+                cpt_data = self.data.groupby(parents + [col])[col].agg(['count']).reset_index()
+                cpt_data['parenthash'] = cpt_data.apply(lambda row : generate_hash_string(row,parents),axis=1)
+                cpt_dict = cpt_data.groupby(['parenthash']).apply(lambda cpt: cpt[[col,'count']].set_index(col).to_dict()['count']).reset_index()
+                node_data[col].c_p_t = cpt_dict.set_index("parenthash").to_dict()[0]
+                parents_count_data = self.data.groupby(parents)[parents].size().reset_index()
+                parents_count_data['parenthash'] = parents_count_data.apply(lambda row : generate_hash_string(row,parents),axis=1)
+                node_data[col].parentscount = parents_count_data.set_index("parenthash").to_dict()[0]
+            else:
+                # In case of root node
+                parents = node_data[col].parents
+                cpt_data = self.data.groupby([col])[col].agg(['count']).reset_index()
+                node_data[col].c_p_t = cpt_data.set_index(col).to_dict()['count']
+            #TODO : get probability using parents count
         self.time_taken["get_varchar_nodes"] = (time.time() - START_TIME)
         return node_data
 
@@ -270,56 +263,22 @@ class ModelTrainer(object):
         sub_cols = list(set(sub_cols))
         distinctparentsdata = {}
 
-        """ Extract value list for each parent combination """
-
-        for index, row in self.data[sub_cols].iterrows():
-            for col in numeric_cols:
-                if node_data[col].level !=0:
-                    parents_hash = generate_hash_string(row, node_data[col].parents)
-                    if distinctparentsdata.has_key(col):
-                        if distinctparentsdata[col].has_key(parents_hash):
-                            distinctparentsdata[col][parents_hash].append(row[col])
-                        else:
-                            distinctparentsdata[col][parents_hash] = [row[col]]
-                    else:
-                        distinctparentsdata[col] = {}
-                        distinctparentsdata[col][parents_hash] = [row[col]]
-                else:
-                    if distinctparentsdata.has_key(col):
-                        distinctparentsdata[col].append(row[col])
-                    else:
-                        distinctparentsdata[col] = [row[col]]
-
         """ Extract probability and bandwidth """
-        # if(distinctparentsdata.has_key('payloadSizeResponse')):
-        #    self.logger.debug("values of 10.0.1.2;www.ositis.com = " + ", ".join([str(i) for i in distinctparentsdata['payloadSizeResponse']["www.ositis.com"]]))
+
         for col in numeric_cols:
             if node_data[col].level !=0:
-                for parentskey in distinctparentsdata[col].keys():
-                    # Get Kernel density estimates for given data
-                    bandwidth, kde_vals = kernel_density_estimate(distinctparentsdata[col][parentskey])
-                    # bandwidth, kde_vals = bin_freuqencies(distinctparentsdata[col][parentskey])
-
-                    self.logger.debug("bandwidth for (col,parents) " + col + ","+parentskey+" = "+str(bandwidth))
-                    # Remove bins with 0 probability in kde_vals
-                    # for bin_val in kde_vals.keys():
-                    #     if kde_vals[bin_val] < (0.000000000001):
-                    #         del kde_vals[bin_val]
-                    # if parentskey == "www.ositis.com":
-                    #     self.logger.debug("kde_vals = " + str(kde_vals))
-                    node_data[col].c_p_t[parentskey] = kde_vals
-                    node_data[col].bandwidth[parentskey] = bandwidth
+                parents_list = node_data[col].parents
+                group_df = self.data.groupby(parents_list)[col].apply(list)
+                group_df = group_df.reset_index()
+                group_df['parenthash'] = group_df.apply(lambda row : generate_hash_string(row,parents_list),axis=1)
+                group_df['distri'] = group_df.apply(lambda row : kernel_density_estimate(row[col]),axis=1)
+                group_df[["BW","CPT"]] = group_df.apply(lambda row : pd.Series({"BW":row['distri'][0],"CPT":row['distri'][1]}),axis=1)
+                node_data[col].c_p_t = group_df[['parenthash','CPT']].set_index('parenthash').to_dict()['CPT']
+                node_data[col].bandwidth = group_df[['parenthash','BW']].set_index('parenthash').to_dict()['BW']
             else:
-                    bandwidth, kde_vals = bin_frequencies(distinctparentsdata[col])
-
-                    # self.logger.debug("bandwidth for"+col+" = "+str(bandwidth))
-                    # Remove bins with 0 probability in kde_vals
-                    # for bin_val in kde_vals.keys():
-                    #     if kde_vals[bin_val] < (0.000000000001):
-                    #         del kde_vals[bin_val]
-
-                    node_data[col].c_p_t = kde_vals
-                    node_data[col].bandwidth = bandwidth
+                bandwidth, kde_vals = bin_frequencies(distinctparentsdata[col])
+                node_data[col].c_p_t = kde_vals
+                node_data[col].bandwidth = bandwidth
 
         self.time_taken["get_numeric_nodes"] = (time.time() - START_TIME)
         return node_data
@@ -375,24 +334,6 @@ class ModelTrainer(object):
                 sub_data[root_node] = pd.to_datetime(sub_data[root_node])
 
                 #Extrach Week minute
-                # sub_data["weekMinute"] = sub_data[root_node].apply(lambda ts: ts.weekday()*24*60 +
-                # ts.hour*60 + ts.minute)
-
-                ## Extract Minute probabilities using KDE
-                # bandwidth, kde_time = kernel_density_estimate(sub_data["weekMinute"].tolist(),list(np.arange(0,10040)))
-                # for bin_val in kde_time.keys():
-                #     if kde_time[bin_val] < (0.000000000001):
-                #         del kde_time[bin_val]
-
-                ## Extracting probabilities using Frequencies
-                # Extract Weekday counts
-                # sub_data_dates = sub_data[root_node].apply(lambda dt: datetime.datetime(dt.year,dt.month,dt.day,0,0))
-                # sub_data_dates = pd.DataFrame(sub_data_dates.unique())
-                # sub_data_dates[0] = pd.to_datetime(sub_data_dates[0])
-                # sub_data_weekday = sub_data_dates[0].apply(lambda ts: ts.weekday())
-                # weekday_counts_old = sub_data_weekday.value_counts().to_dict()
-                #
-                # self.logger.debug("New weekday count " + str(weekday_counts))
 
                 if node_data[root_node].time_bucket == "weekhour":
                     # Week hour counts

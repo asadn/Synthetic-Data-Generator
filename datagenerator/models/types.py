@@ -56,6 +56,7 @@ class VarcharCol(Column):
 class FloatCol(Column):
     """ Used to store float data type information """
     col_type = "float"
+
     def __init__(self, *initial_data, **kwargs):
         if bool(kwargs):
             super(FloatCol, self).__init__(kwargs['name'], self.col_type, kwargs['position'], kwargs['level'],
@@ -68,9 +69,10 @@ class FloatCol(Column):
                     dict_in['is_root'], dict_in['parents'] if dict_in.has_key('parents') else None, dict_in['parentscount'] if dict_in.has_key('parents') else None)
             self.bandwidth = dict_in['bandwidth']
             self.c_p_t = dict_in['c_p_t']
+
     def get_value(self, bin_val,bw):
         """ Returns a random value generated using the bin and bandwidth"""
-        # value = random.uniform(bin_val, bin_val+bw, 1)
+
         if(bw == 0):
             return int(bin_val)
         else:
@@ -79,6 +81,7 @@ class FloatCol(Column):
                 value = 0
         # value = bin_val
         return float(value)
+
     def generate_value(self,rec):
         """ Gets value from CPT for given parents """
         hash_string = generate_hash_string(rec,self.parents)
@@ -90,6 +93,7 @@ class FloatCol(Column):
 class IntCol(Column):
     """ Used to store int data type information """
     col_type = "int"
+
     def __init__(self, *initial_data, **kwargs):
         if bool(kwargs):
             super(IntCol, self).__init__(kwargs['name'], self.col_type, kwargs['position'], kwargs['level'],
@@ -102,6 +106,7 @@ class IntCol(Column):
                     dict_in['is_root'], dict_in['parents'] if dict_in.has_key('parents') else None, dict_in['parentscount'] if dict_in.has_key('parents') else None)
             self.bandwidth = dict_in['bandwidth']
             self.c_p_t = dict_in['c_p_t']
+
     def get_value(self, bin_val,bw):
         """ Returns a random value generated using the bin and bandwidth"""
         # value = random.uniform(bin_val, bin_val+bw, 1)
@@ -113,6 +118,7 @@ class IntCol(Column):
                 value = 0
         # value = bin_val
         return int(value)
+
     def generate_value(self,rec):
         """ Gets value from CPT for given parents """
         hash_string = generate_hash_string(rec,self.parents)
@@ -134,7 +140,9 @@ class TimestampCol(Column):
             self.time_bucket = kwargs['time_bucket']
             self.time_probs = kwargs['time_probs']
             self.number_eventsPH = kwargs['number_eventsPH']
+
         dict_in = initial_data[0] if len(initial_data)>0 else {}
+
         if bool(dict_in):
             super(TimestampCol, self).__init__(dict_in['name'], self.col_type, dict_in['position'], dict_in['level'],
                                                dict_in['is_root'], dict_in['parents'] if dict_in.has_key('parents') else None, dict_in['parentscount'] if dict_in.has_key('parents') else None)
